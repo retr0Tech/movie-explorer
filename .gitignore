@@ -1,0 +1,21 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv
+.env
+.env.*
+
+# Build outputs
+frontend/build/
+backend/dist/
+
+# Editor junk
+.vscode/
+.idea/
+.DS_Store
+
+# OS
+Thumbs.db
