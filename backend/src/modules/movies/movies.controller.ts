@@ -76,4 +76,10 @@ export class MoviesController {
   ) {
     return this.moviesService.deleteFavorite(id, userId);
   }
+
+  // AI Recommendations endpoint
+  @Get('recommendations/:imdbId')
+  async getRecommendations(@Param('imdbId') imdbId: string) {
+    return this.moviesService.getRecommendations(imdbId);
+  }
 }

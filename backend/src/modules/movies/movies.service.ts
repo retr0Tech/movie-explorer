@@ -11,6 +11,7 @@ import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 import { FavoriteResponseDto } from './dto/favorite-response.dto';
 import { OmdbService } from '../../infrastructure/omdb/omdb.service';
+import { AIRecommendationService } from '../../infrastructure/ai/ai-recommendation.service';
 
 @Injectable()
 export class MoviesService {
@@ -18,6 +19,7 @@ export class MoviesService {
     @InjectRepository(Favorite)
     private readonly favoriteRepository: Repository<Favorite>,
     private readonly omdbService: OmdbService,
+    private readonly aiRecommendationService: AIRecommendationService,
   ) {}
 
   async getFavorites(userId: string): Promise<FavoriteResponseDto[]> {
@@ -119,6 +121,32 @@ export class MoviesService {
 
   async getMovieDetails(imdbId: string) {
     return this.omdbService.getMovieById(imdbId);
+  }
+
+  async getRecommendations(imdbId: string) {
+    // First, get the movie details from OMDB
+    const movieDetails = await this.omdbService.getMovieById(imdbId);
+
+    if (!movieDetails || movieDetails.Response === 'False') {
+      throw new NotFoundException('Movie not found');
+    }
+
+    // Use AI to generate recommendations
+    const recommendations = await this.aiRecommendationService.getMovieRecommendations(
+      movieDetails.Title,
+      movieDetails.Year,
+      movieDetails.Genre,
+      movieDetails.Plot,
+    );
+
+    return {
+      movie: {
+        title: movieDetails.Title,
+        year: movieDetails.Year,
+        imdbId: movieDetails.imdbID,
+      },
+      recommendations: recommendations.slice(0, 5), // Ensure max 5 recommendations
+    };
   }
 
   private mapToResponseDto(favorite: Favorite): FavoriteResponseDto {
