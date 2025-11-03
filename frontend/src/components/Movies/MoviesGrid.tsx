@@ -3,7 +3,7 @@ import { DataView } from 'primereact/dataview';
 import { Movie } from '../../models/movies/movie'
 
 export default function MoviesGrid({movies}: {movies: Movie[]}) {
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 
 	return (
 		<div className="dataview-demo">

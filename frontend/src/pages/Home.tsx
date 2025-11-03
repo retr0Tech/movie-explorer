@@ -3,16 +3,31 @@ import { TabView, TabPanel } from "primereact/tabview";
 /*New imports */
 import { Card } from "primereact/card";
 import MoviesExplorer from "../components/Movies/MoviesExplorer";
+import { Button } from "primereact/button";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export const Home = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const {logout, isAuthenticated, loginWithRedirect } = useAuth0();
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      loginWithRedirect();
+    }
+  }, [isAuthenticated, loginWithRedirect]);
+
+  const header = () => {
+    return (
+      <div style={{position: 'absolute', right: '10px', top: '12px'}}>
+        <Button label='Sign Out' severity='secondary' onClick={() => logout()}></Button>
+      </div>
+    )
+  }
 
   return (
     <div className="Home">
       <div className="card">
-        <Card title="Movie Explorer"></Card>
+        <Card title='Movie Explorer' header={header}></Card>
       </div>
       <TabView
         className="tabview-header-icon"

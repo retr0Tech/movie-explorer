@@ -1,98 +1,350 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Movie Explorer Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS-based backend API for managing favorite movies with Auth0 authentication and OMDB API integration.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **Authentication**: Secure endpoints using Auth0 JWT authentication
+- **Favorites Management**: Full CRUD operations for user's favorite movies
+- **Movie Search**: Search movies by title using OMDB API
+- **Movie Details**: Get detailed information about movies from OMDB
+- **PostgreSQL Database**: Persistent storage with TypeORM
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tech Stack
 
-## Project setup
+- **Framework**: NestJS 11
+- **Language**: TypeScript 5.7
+- **Database**: PostgreSQL with TypeORM
+- **Authentication**: Auth0 (JWT with RS256)
+- **External API**: OMDB API
+- **Validation**: class-validator & class-transformer
 
-```bash
-$ npm install
+## Project Structure
+
+```
+src/
+├── core/                           # Domain layer
+│   └── exceptions/                 # Custom exceptions
+├── infrastructure/                 # Infrastructure layer
+│   ├── database/                   # Database configuration
+│   └── omdb/                       # OMDB API integration
+├── modules/                        # Feature modules
+│   ├── auth/                       # Auth0 authentication
+│   │   ├── jwt.strategy.ts
+│   │   ├── jwt-auth.guard.ts
+│   │   └── decorators/user.decorator.ts
+│   └── movies/                     # Movies & favorites module
+│       ├── entities/               # Database entities
+│       ├── dto/                    # Data transfer objects
+│       ├── movies.controller.ts
+│       ├── movies.service.ts
+│       └── movies.module.ts
+├── app.module.ts
+└── main.ts
 ```
 
-## Compile and run the project
+## Setup Instructions
+
+### 1. Install Dependencies
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+### 2. Configure Environment Variables
+
+Copy `.env.example` to `src/.env` and update the values:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example src/.env
 ```
 
-## Deployment
+Required environment variables:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+```env
+# Server Configuration
+PORT=3000
+FRONTEND_URL=http://localhost:5173
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+# Auth0 Configuration
+AUTH0_DOMAIN=dev-0kc6l1vo2s2esnak.us.auth0.com
+AUTH0_CLIENT_ID=gkSMJNU9w6u9PYsB5Zo2iJVNqo6cMaNj
+AUTH0_CLIENT_SECRET=your-client-secret
+AUTH0_AUDIENCE=https://dev-0kc6l1vo2s2esnak.us.auth0.com/api/v2/
+
+# OMDB API Configuration
+OMDB_API_KEY=189f1c16
+
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=your_db_username
+DB_PASSWORD=your_db_password
+DB_NAME=movie_explorer
+```
+
+### 3. Set Up Auth0
+
+Your Auth0 application is already configured with:
+- **Domain**: `dev-0kc6l1vo2s2esnak.us.auth0.com`
+- **Client ID**: `gkSMJNU9w6u9PYsB5Zo2iJVNqo6cMaNj`
+
+The credentials are already set in the `.env` file. Make sure your Auth0 application has:
+1. The correct callback URLs configured for your frontend
+2. API permissions configured if you're using a custom API
+
+### 4. Set Up PostgreSQL Database
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Create database
+createdb movie_explorer
+
+# Or using psql
+psql -U postgres
+CREATE DATABASE movie_explorer;
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 5. Run Database Migrations
 
-## Resources
+The application uses TypeORM. On first run, you may need to sync the schema:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# For development, you can temporarily enable synchronize in database.postgresql.ts
+# Or create migrations (recommended for production)
+npm run start:dev
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### 6. Start the Application
 
-## Support
+```bash
+# Development mode with hot reload
+npm run start:dev
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# Production mode
+npm run build
+npm run start:prod
+```
 
-## Stay in touch
+The API will be available at `http://localhost:3000`
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## API Endpoints
+
+### Authentication
+
+All endpoints require an Auth0 JWT token in the Authorization header:
+
+```
+Authorization: Bearer <your-auth0-token>
+```
+
+### Movies Search
+
+#### Search Movies by Title
+```
+GET /movies/search?title=<movie-title>&page=<page-number>
+```
+
+**Query Parameters:**
+- `title` (required): Movie title to search
+- `page` (optional): Page number (default: 1)
+
+**Response:**
+```json
+{
+  "Search": [
+    {
+      "Title": "The Matrix",
+      "Year": "1999",
+      "imdbID": "tt0133093",
+      "Type": "movie",
+      "Poster": "https://..."
+    }
+  ],
+  "totalResults": "1",
+  "Response": "True"
+}
+```
+
+#### Get Movie Details
+```
+GET /movies/:imdbId
+```
+
+**Response:** Full movie details from OMDB
+
+### Favorites Management
+
+#### Get All Favorites
+```
+GET /favorites
+```
+
+**Response:**
+```json
+[
+  {
+    "id": "uuid",
+    "userId": "auth0|123",
+    "imdbId": "tt0133093",
+    "title": "The Matrix",
+    "year": "1999",
+    "poster": "https://...",
+    "genre": "Action, Sci-Fi",
+    "plot": "A computer hacker learns...",
+    "imdbRating": "8.7",
+    "director": "Lana Wachowski, Lilly Wachowski",
+    "actors": "Keanu Reeves, Laurence Fishburne",
+    "runtime": "136 min",
+    "createdAt": "2025-01-01T00:00:00.000Z",
+    "updatedAt": "2025-01-01T00:00:00.000Z"
+  }
+]
+```
+
+#### Get Favorite by ID
+```
+GET /favorites/:id
+```
+
+#### Add Movie to Favorites
+```
+POST /favorites
+```
+
+**Request Body:**
+```json
+{
+  "imdbId": "tt0133093",
+  "title": "The Matrix",
+  "year": "1999",
+  "poster": "https://...",
+  "genre": "Action, Sci-Fi",
+  "plot": "A computer hacker learns...",
+  "imdbRating": "8.7",
+  "director": "Lana Wachowski, Lilly Wachowski",
+  "actors": "Keanu Reeves, Laurence Fishburne",
+  "runtime": "136 min"
+}
+```
+
+**Required fields:** `imdbId`, `title`, `year`
+
+**Response:** Created favorite object (HTTP 201)
+
+#### Update Favorite
+```
+PUT /favorites/:id
+```
+
+**Request Body:** (all fields optional)
+```json
+{
+  "title": "Updated Title",
+  "year": "2000",
+  "plot": "Updated plot..."
+}
+```
+
+**Response:** Updated favorite object
+
+#### Delete Favorite
+```
+DELETE /favorites/:id
+```
+
+**Response:** HTTP 204 No Content
+
+## Error Handling
+
+The API uses standard HTTP status codes:
+
+- `200` - Success
+- `201` - Created
+- `204` - No Content
+- `400` - Bad Request (validation errors)
+- `401` - Unauthorized (missing or invalid token)
+- `403` - Forbidden (trying to modify another user's favorite)
+- `404` - Not Found
+- `409` - Conflict (duplicate favorite)
+- `500` - Internal Server Error
+
+## Security Features
+
+- **Auth0 Authentication**: OAuth2/JWT token validation using express-oauth2-jwt-bearer
+- **User Isolation**: Users can only access their own favorites
+- **Input Validation**: All inputs are validated using class-validator
+- **CORS Protection**: Configured for frontend origin only
+- **SQL Injection Protection**: TypeORM parameterized queries
+
+## Development
+
+```bash
+# Run tests
+npm run test
+
+# Run e2e tests
+npm run test:e2e
+
+# Lint code
+npm run lint
+
+# Format code
+npm run format
+```
+
+## Database Schema
+
+### Favorites Table
+
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| user_id | VARCHAR | Auth0 user ID |
+| imdb_id | VARCHAR | IMDB movie ID |
+| title | VARCHAR | Movie title |
+| year | VARCHAR | Release year |
+| poster | VARCHAR | Poster URL (nullable) |
+| genre | VARCHAR | Genre (nullable) |
+| plot | TEXT | Plot description (nullable) |
+| imdb_rating | VARCHAR | IMDB rating (nullable) |
+| director | VARCHAR | Director (nullable) |
+| actors | VARCHAR | Actors (nullable) |
+| runtime | VARCHAR | Runtime (nullable) |
+| created_at | TIMESTAMP | Creation timestamp |
+| updated_at | TIMESTAMP | Last update timestamp |
+
+**Indexes:**
+- Primary key on `id`
+- Index on `user_id`
+- Unique composite index on `(user_id, imdb_id)`
+
+## Troubleshooting
+
+### Database Connection Issues
+
+If you get database connection errors:
+
+1. Ensure PostgreSQL is running
+2. Verify database credentials in `.env`
+3. Check that the database exists
+4. Ensure the database user has proper permissions
+
+### Auth0 Token Validation Fails
+
+1. Verify `AUTH0_DOMAIN` is correct: `dev-0kc6l1vo2s2esnak.us.auth0.com`
+2. Check that `AUTH0_AUDIENCE` matches your API identifier
+3. Ensure your Auth0 token is not expired
+4. Verify the token is in the format: `Bearer <token>`
+5. Make sure your frontend is requesting tokens from the correct Auth0 domain
+
+### OMDB API Errors
+
+If movie searches fail:
+
+1. Verify `OMDB_API_KEY` is set correctly
+2. Check your API key hasn't exceeded rate limits
+3. Test the API key directly: `http://www.omdbapi.com/?apikey=189f1c16&s=matrix`
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED
