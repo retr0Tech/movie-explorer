@@ -3,12 +3,27 @@ import { Calendar } from 'primereact/calendar';
 import { FloatLabel } from 'primereact/floatlabel';
 import { InputText } from 'primereact/inputtext'
 import { Panel } from 'primereact/panel'
-import React, { useState } from 'react'
+import { useState } from 'react'
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { getMoviesAsync, selectMovies } from '../../store/movie/movie-slice';
 import MoviesGrid from './MoviesGrid';
 
 export default function MoviesExplorer() {
+	const dispatch = useAppDispatch();
+	const movies = useAppSelector(selectMovies);
 	const [title, setTitle] = useState('');
 	const [date, setDate] = useState<Date | null>(null);
+
+	const handleSearch = () => {
+		if (title.trim()) {
+			dispatch(getMoviesAsync(title.trim(), 1));
+		}
+	};
+
+	const handleReset = () => {
+		setTitle('');
+		setDate(null);
+	};
 
 	return (
 		<div>
@@ -23,12 +38,12 @@ export default function MoviesExplorer() {
 					<label htmlFor="Year">Year</label>
 				</FloatLabel>
 				<div className='movie-explorer-options'>
-					<Button label='Search'></Button>
-					<Button label='Reset' severity='secondary'></Button>
+					<Button label='Search' onClick={handleSearch}></Button>
+					<Button label='Reset' severity='secondary' onClick={handleReset}></Button>
 				</div>
 			</div>
 		</Panel>
-		<MoviesGrid movies={[]}></MoviesGrid>
+		<MoviesGrid movies={movies}></MoviesGrid>
 	</div>
 	)
 }

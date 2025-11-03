@@ -16,8 +16,8 @@ export class PostgresDatabase {
       password: this.configService.get<string>('DB_PASSWORD', 'password'),
       database: this.configService.get<string>('DB_NAME', 'movie_explorer'),
       entities,
-      synchronize: false, // Set to false in production
-      logging: false, // Disable logging in production
+      synchronize: true, // Auto-create schema for development/testing
+      logging: true, // Enable logging to debug queries
     };
   }
 

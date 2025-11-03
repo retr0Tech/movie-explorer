@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { TabView, TabPanel } from "primereact/tabview";
-/*New imports */
 import { Card } from "primereact/card";
-import MoviesExplorer from "../components/Movies/MoviesExplorer";
 import { Button } from "primereact/button";
 import { useAuth0 } from "@auth0/auth0-react";
+import MoviesExplorer from "../components/Movies/MoviesExplorer";
+import FavoriteMovie from "../components/FavoriteMovie";
 
 export const Home = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const {logout, isAuthenticated, loginWithRedirect } = useAuth0();
+  const { logout, isAuthenticated, loginWithRedirect } = useAuth0();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -38,7 +38,7 @@ export const Home = () => {
           <MoviesExplorer></MoviesExplorer>
         </TabPanel>
         <TabPanel header="Favorites" leftIcon="pi pi-star">
-          {/* favorite movies */}
+          <FavoriteMovie></FavoriteMovie>
         </TabPanel>
       </TabView>
     </div>
