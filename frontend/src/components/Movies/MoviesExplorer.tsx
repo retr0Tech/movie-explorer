@@ -12,7 +12,7 @@ export default function MoviesExplorer() {
 	const dispatch = useAppDispatch();
 	const movies = useAppSelector(selectMovies);
 	const totalRecords = useAppSelector(selectTotalMovies);
-	const { getAccessTokenSilently } = useAuth0();
+	const { getAccessTokenSilently, user} = useAuth0();
 	const [title, setTitle] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [page, setPage] = useState(0);

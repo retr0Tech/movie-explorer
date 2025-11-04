@@ -3,37 +3,35 @@ import { DataView } from 'primereact/dataview';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectFavoriteMovies, setFavoriteMovie } from '../store/movie/movie-slice';
+import { selectFavoriteMovies } from '../store/movie/movie-slice';
 import { Movie } from '../models/movies/movie';
-// import { useEffect } from 'react';
-// import { getFavoriteMoviesAsync } from '../store/movie/movie-slice';
-// import * as movieService from '../services/movie-service';
+import { useEffect } from 'react';
+import { getFavoriteMoviesAsync } from '../store/movie/movie-slice';
+import * as movieService from '../services/movie-service';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export default function FavoriteMovie() {
 	const dispatch = useAppDispatch();
+	const { getAccessTokenSilently, user} = useAuth0();
 	const favoriteMovies = useAppSelector(selectFavoriteMovies);
+	
 
 	// Optional: Fetch favorites from backend on component mount
 	// Uncomment when authentication/token is available
-	// useEffect(() => {
-	// 	const token = 'your-auth-token'; // Get from auth context/store
-	// 	dispatch(getFavoriteMoviesAsync(token));
-	// }, [dispatch]);
+	useEffect(() => {
+		getAccessTokenSilently().then(token => {
+			dispatch(getFavoriteMoviesAsync(token));
+		});
+	}, [dispatch, getAccessTokenSilently]);
 
 	const handleRemoveFavorite = async (movie: Movie) => {
-		// Remove from Redux store
-		const updatedMovie = { ...movie, isFavorite: false };
-		dispatch(setFavoriteMovie(updatedMovie));
-
-		// Optional: Sync with backend
-		// Uncomment when authentication is set up
-		// try {
-		// 	const token = 'your-auth-token'; // Get from auth context/store
-		// 	const deleteService = movieService.deleteFavorite();
-		// 	await deleteService(movie.imdbID, token);
-		// } catch (error) {
-		// 	console.error('Failed to remove favorite from backend:', error);
-		// }
+		try {
+			const token = await getAccessTokenSilently();
+			const deleteService = movieService.deleteFavorite();
+			await deleteService(movie.imdbID, token);
+		} catch (error) {
+			console.error('Failed to remove favorite from backend:', error);
+		}
 	};
 
 	const itemTemplate = (movie: Movie) => {

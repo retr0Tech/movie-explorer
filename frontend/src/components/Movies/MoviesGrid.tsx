@@ -1,29 +1,25 @@
 import { DataView } from 'primereact/dataview';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Movie } from '../../models/movies/movie';
-import { useAppDispatch } from '../../store/hooks';
-import { setFavoriteMovie } from '../../store/movie/movie-slice';
 import MovieGridItem from './MovieGridItem';
 import * as movieService from '../../services/movie-service';
 import { ProgressSpinner } from 'primereact/progressspinner';
 
 export default function MoviesGrid({movies, totalRecords, currentPage, isLoading, onPageChange}: {movies: Movie[], totalRecords: number, currentPage: number, isLoading: boolean, onPageChange: Function}) {
-	const dispatch = useAppDispatch();
-	const { getAccessTokenSilently } = useAuth0();
+	const { getAccessTokenSilently, user} = useAuth0();
 
 	const handleToggleFavorite = async (movie: Movie) => {
 		// Update Redux store optimistically
+		const token = await getAccessTokenSilently();
 		const updatedMovie = { ...movie, isFavorite: !movie.isFavorite };
-		dispatch(setFavoriteMovie(updatedMovie));
 
 		// Sync with backend
 		try {
-			const token = await getAccessTokenSilently();
 
 			if (updatedMovie.isFavorite) {
 				// Add to favorites - first fetch full movie details
 				const movieDetailsService = movieService.getMovieById();
-				const movieDetailsResponse = await movieDetailsService(movie.imdbID);
+				const movieDetailsResponse = await movieDetailsService(movie.imdbID, token);
 
 				if (movieDetailsResponse.success && movieDetailsResponse.data) {
 					const details = movieDetailsResponse.data;
@@ -60,8 +56,6 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 			}
 		} catch (error) {
 			console.error('Failed to sync favorite with backend:', error);
-			// Revert the optimistic update on error
-			dispatch(setFavoriteMovie(movie));
 		}
 	};
 
