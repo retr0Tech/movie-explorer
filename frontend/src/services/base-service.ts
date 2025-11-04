@@ -4,24 +4,31 @@ const request = <T, K>(): (
     requestPath: string,
     method: string,
     headers: {},
-    payload?: K
+    payload?: K,
+    accessToken?: string
 ) => Promise<GenericResponse<T>> => {
     return async (
         requestPath: string,
         method: string,
         headers: {},
-        payload?: K
+        payload?: K,
+        accessToken?: string
     ) => {
-        const baseUrl: string = process.env.REACT_APP_BASE_API_URL|| '';
-        const apiKey: string = process.env.REACT_APP_API_TOKEN || '';
+        const baseUrl: string = process.env.REACT_APP_BACKEND_API_URL || '';
         const body = payload ? JSON.stringify(payload) : null;
+        const requestHeaders: HeadersInit = {
+            'Content-Type': 'application/json',
+            ...headers
+        };
+
+        if (accessToken) {
+            requestHeaders['Authorization'] = `Bearer ${accessToken}`;
+        }
+
         return new Promise<GenericResponse<T>>((resolve) => {
-            fetch(`${baseUrl}?apikey=${apiKey}&${requestPath}`, {
+            fetch(`${baseUrl}${requestPath}`, {
                 method,
-                headers: {
-                'Content-Type': 'application/json',
-                ...headers
-                },
+                headers: requestHeaders,
                 body
             })
                 .then(async (res: Response) => {
@@ -44,37 +51,37 @@ const request = <T, K>(): (
 };
 
 export const get = <T>(): (
-    requestPath: string, headers?: {}
+    requestPath: string, headers?: {}, accessToken?: string
 ) => Promise<GenericResponse<T>> => {
     const _request = request<T, null>();
-    return async (requestPath: string, headers: {} = {}) => {
-        return await _request(requestPath, 'GET', headers, null);
+    return async (requestPath: string, headers: {} = {}, accessToken?: string) => {
+        return await _request(requestPath, 'GET', headers, null, accessToken);
     }
 };
 
 export const post = <T, K>(): (
-    requestPath: string, payload?: K, headers?: {}
+    requestPath: string, payload?: K, headers?: {}, accessToken?: string
 ) => Promise<GenericResponse<T>> => {
     const _request = request<T, K>();
-    return async (requestPath: string, payload?: K, headers: {} = {}) => {
-        return await _request(requestPath, 'POST', headers, payload);
+    return async (requestPath: string, payload?: K, headers: {} = {}, accessToken?: string) => {
+        return await _request(requestPath, 'POST', headers, payload, accessToken);
     }
 };
 
 export const put = <T, K>(): (
-    requestPath: string, payload: K, headers?: {}
+    requestPath: string, payload: K, headers?: {}, accessToken?: string
 ) => Promise<GenericResponse<T>> => {
     const _request = request<T, K>();
-    return async (requestPath: string, payload: K, headers: {} = {}) => {
-        return await _request(requestPath, 'PUT', headers, payload);
+    return async (requestPath: string, payload: K, headers: {} = {}, accessToken?: string) => {
+        return await _request(requestPath, 'PUT', headers, payload, accessToken);
     }
 };
 
 export const _delete = <T>(): (
-    requestPath: string, headers?: {}
+    requestPath: string, headers?: {}, accessToken?: string
 ) => Promise<GenericResponse<T>> => {
     const _request = request<T, null>();
-    return async (requestPath: string, headers: {} = {}) => {
-        return await _request(requestPath, 'DELETE', headers, null);
+    return async (requestPath: string, headers: {} = {}, accessToken?: string) => {
+        return await _request(requestPath, 'DELETE', headers, null, accessToken);
     }
 };

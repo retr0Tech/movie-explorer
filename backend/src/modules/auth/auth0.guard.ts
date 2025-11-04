@@ -58,9 +58,9 @@ export class Auth0Guard implements CanActivate {
       }
 
       return true;
-    } catch {
+    } catch (error) {
       throw new UnauthorizedException(
-        'Invalid or missing authentication token',
+        `Invalid or missing authentication token ${error}`,
       );
     }
   }

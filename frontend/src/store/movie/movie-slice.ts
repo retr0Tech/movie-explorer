@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Movie } from "../../models/movies/movie";
-import { MovieResponse, OmdbMovieDto } from "../../models/movies/movie-response";
+import { MovieResponse } from "../../models/movies/movie-response";
 import { AppThunk, RootState } from "../index";
 import { MovieType } from "../../enums/movie-type";
 import * as movieService from "../../services/movie-service";
@@ -14,18 +14,18 @@ export interface MoviesState {
 const initialState: MoviesState = {
     movies: [],
     totalMovies: 0,
-    favoriteMovies: JSON.parse(sessionStorage.getItem('favorite-movies') || '[]'),
+    favoriteMovies: JSON.parse(sessionStorage.getItem('favorite-movies') || '[]')
 };
 
 export const getMoviesAsync = (
     title: string,
-    page: number = 1
+    page?: number,
+    token?: string | null | undefined
 ): AppThunk<Promise<void>> => {
     return async (dispatch) => {
         const getMovieService = movieService.getMovie();
-        const moviesResponse = await getMovieService(title, page);
+        const moviesResponse = await getMovieService(title, page || 1, token || undefined);
         if (moviesResponse.success && moviesResponse.data && moviesResponse.data.Search) {
-            // Convert OmdbMovieDto[] to MovieResponse[]
             const movieResponses: MovieResponse[] = moviesResponse.data.Search.map(movie => ({
                 title: movie.Title,
                 year: parseInt(movie.Year),
@@ -33,17 +33,26 @@ export const getMoviesAsync = (
                 type: movie.Type as MovieType,
                 poster: movie.Poster
             }));
+            const totalRecords = parseInt(moviesResponse.data.totalResults)
+            dispatch(setTotalMovies(totalRecords))
             dispatch(setMovies(movieResponses));
         }
     };
 }
 
 export const getFavoriteMoviesAsync = (
-    token: string
+    token?: string
 ): AppThunk<Promise<void>> => {
     return async (dispatch) => {
+        const authToken = token;
+
+        if (!authToken) {
+            console.error('No token available to fetch favorites');
+            return;
+        }
+
         const getFavoritesService = movieService.getFavoriteMovies();
-        const favoritesResponse = await getFavoritesService(token);
+        const favoritesResponse = await getFavoritesService(authToken);
         if (favoritesResponse.success && favoritesResponse.data) {
             // Map FavoriteMovieResponse[] to MovieResponse[]
             const movieResponses: MovieResponse[] = favoritesResponse.data.map(fav => ({
@@ -74,7 +83,9 @@ export const moviesSlice = createSlice({
                 );
             });
             state.movies = movies;
-            state.totalMovies = movies.length;
+        },
+        setTotalMovies: (state, action: PayloadAction<number>) => {
+            state.totalMovies = action.payload;
         },
         setFavoriteMovies: (state, action: PayloadAction<MovieResponse[]>) => {
             const favoriteMovies = action.payload.map((movieResponse) => {
@@ -118,6 +129,7 @@ export const {
     setMovies,
     setFavoriteMovies,
     setFavoriteMovie,
+    setTotalMovies,
 } = moviesSlice.actions;
 
 export const selectMovies = (state: RootState) => state.movies.movies;

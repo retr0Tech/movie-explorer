@@ -5,18 +5,17 @@ import { OmdbSearchResponseDto, OmdbMovieDetailDto } from "../models/movies/movi
 import * as omdbService from "./base-service";
 import * as backendService from "./backend-service";
 
-// OMDB API calls (for movie search)
 export const getMovie = () => {
     const _get = omdbService.get<OmdbSearchResponseDto>();
-    return async (title: string, page: number = 1) => {
-        return await _get(`s=${title}&page=${page}`);
+    return async (title: string, page: number = 1, token?: string) => {
+        return await _get(`movies/search?title=${title}&page=${page}`, {}, token);
     }
 };
 
 export const getMovieById = () => {
     const _get = omdbService.get<OmdbMovieDetailDto>();
     return async (movieId: string) => {
-        return await _get(`i=${movieId}&plot=full`);
+        return await _get(`movies/${movieId}`);
     }
 };
 

@@ -1,49 +1,60 @@
 import { Button } from 'primereact/button'
-import { Calendar } from 'primereact/calendar';
 import { FloatLabel } from 'primereact/floatlabel';
 import { InputText } from 'primereact/inputtext'
 import { Panel } from 'primereact/panel'
 import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { getMoviesAsync, selectMovies } from '../../store/movie/movie-slice';
+import { getMoviesAsync, selectMovies, selectTotalMovies, setMovies, setTotalMovies } from '../../store/movie/movie-slice';
 import MoviesGrid from './MoviesGrid';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export default function MoviesExplorer() {
 	const dispatch = useAppDispatch();
 	const movies = useAppSelector(selectMovies);
+	const totalRecords = useAppSelector(selectTotalMovies);
+	const { getAccessTokenSilently } = useAuth0();
 	const [title, setTitle] = useState('');
-	const [date, setDate] = useState<Date | null>(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [page, setPage] = useState(0);
+	const [isActive, setIsActive] = useState(false);
 
-	const handleSearch = () => {
+	const handleSearch = async (page: number) => {
+		setIsActive(true);
 		if (title.trim()) {
-			dispatch(getMoviesAsync(title.trim(), 1));
+			setIsLoading(true);
+			const token = await getAccessTokenSilently();
+			await dispatch(getMoviesAsync(title.trim(), page, token));
+			setIsLoading(false);
 		}
 	};
+	const onPageChange = async (event: { page: number; first: number}) => {
+		const { page, first } = event;
+		setPage(first);
+    await handleSearch(page+1);
+	}
 
-	const handleReset = () => {
+	const handleReset = () => {		
 		setTitle('');
-		setDate(null);
+		dispatch(setMovies([]));
+		dispatch(setTotalMovies(0));
+		setIsActive(false);
 	};
 
 	return (
 		<div>
-		<Panel header="Search Movie By Title">
+		<Panel header="Search Movie By Title" style={{marginBottom: '20px'}}>
 			<div className='movie-explorer'>
 				<FloatLabel>
 					<InputText id="title" value={title} onChange={(e) => setTitle(e.target.value)}></InputText>
 					<label htmlFor="Title">Title</label>
 				</FloatLabel>
-				<FloatLabel>
-					<Calendar value={date} onChange={(e) => setDate(e.value ?? null)} view="year" dateFormat="yy" showIcon/>
-					<label htmlFor="Year">Year</label>
-				</FloatLabel>
 				<div className='movie-explorer-options'>
-					<Button label='Search' onClick={handleSearch}></Button>
+					<Button label='Search' onClick={() => {handleSearch(1)}}></Button>
 					<Button label='Reset' severity='secondary' onClick={handleReset}></Button>
 				</div>
 			</div>
 		</Panel>
-		<MoviesGrid movies={movies}></MoviesGrid>
+		{isActive && <MoviesGrid movies={movies} totalRecords={totalRecords} isLoading={isLoading} onPageChange={onPageChange} currentPage={page}></MoviesGrid>}
 	</div>
 	)
 }

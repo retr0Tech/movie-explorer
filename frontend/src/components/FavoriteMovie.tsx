@@ -2,74 +2,38 @@ import { Panel } from 'primereact/panel';
 import { DataView } from 'primereact/dataview';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
-import { useEffect, useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectFavoriteMovies, setFavoriteMovie, setFavoriteMovies } from '../store/movie/movie-slice';
+import { selectFavoriteMovies, setFavoriteMovie } from '../store/movie/movie-slice';
 import { Movie } from '../models/movies/movie';
-import { MovieType } from '../enums/movie-type';
-import * as movieService from '../services/movie-service';
+// import { useEffect } from 'react';
+// import { getFavoriteMoviesAsync } from '../store/movie/movie-slice';
+// import * as movieService from '../services/movie-service';
 
 export default function FavoriteMovie() {
 	const dispatch = useAppDispatch();
 	const favoriteMovies = useAppSelector(selectFavoriteMovies);
-	const { getAccessTokenSilently } = useAuth0();
-	const [isLoading, setIsLoading] = useState(false);
 
-	// Fetch favorites from backend on component mount
-	useEffect(() => {
-		const fetchFavorites = async () => {
-			setIsLoading(true);
-			try {
-				const token = await getAccessTokenSilently();
-				const getFavoritesService = movieService.getFavoriteMovies();
-				const response = await getFavoritesService(token);
-
-				if (response.success && response.data) {
-					// Convert backend favorites to Movie format
-					const movies: Movie[] = response.data.map((fav: any) => ({
-						imdbID: fav.imdbId,
-						title: fav.title,
-						year: parseInt(fav.year),
-						poster: fav.poster,
-						type: MovieType.Movie,
-						isFavorite: true
-					}));
-					dispatch(setFavoriteMovies(movies));
-				}
-			} catch (error) {
-				console.error('Failed to fetch favorites:', error);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchFavorites();
-	}, [dispatch, getAccessTokenSilently]);
+	// Optional: Fetch favorites from backend on component mount
+	// Uncomment when authentication/token is available
+	// useEffect(() => {
+	// 	const token = 'your-auth-token'; // Get from auth context/store
+	// 	dispatch(getFavoriteMoviesAsync(token));
+	// }, [dispatch]);
 
 	const handleRemoveFavorite = async (movie: Movie) => {
-		// Remove from Redux store optimistically
+		// Remove from Redux store
 		const updatedMovie = { ...movie, isFavorite: false };
 		dispatch(setFavoriteMovie(updatedMovie));
 
-		// Sync with backend
-		try {
-			const token = await getAccessTokenSilently();
-			const getFavoritesService = movieService.getFavoriteMovies();
-			const response = await getFavoritesService(token);
-
-			if (response.success && response.data) {
-				const favorite = response.data.find((fav: any) => fav.imdbId === movie.imdbID);
-				if (favorite) {
-					const deleteService = movieService.deleteFavorite();
-					await deleteService(favorite.id, token);
-				}
-			}
-		} catch (error) {
-			console.error('Failed to remove favorite from backend:', error);
-			// Revert the optimistic update on error
-			dispatch(setFavoriteMovie({ ...movie, isFavorite: true }));
-		}
+		// Optional: Sync with backend
+		// Uncomment when authentication is set up
+		// try {
+		// 	const token = 'your-auth-token'; // Get from auth context/store
+		// 	const deleteService = movieService.deleteFavorite();
+		// 	await deleteService(movie.imdbID, token);
+		// } catch (error) {
+		// 	console.error('Failed to remove favorite from backend:', error);
+		// }
 	};
 
 	const itemTemplate = (movie: Movie) => {
@@ -125,13 +89,36 @@ export default function FavoriteMovie() {
 						{favoriteMovies.length === 0 ? (
 							emptyTemplate()
 						) : (
-							<DataView
-								value={favoriteMovies}
-								layout={'grid'}
-								itemTemplate={itemTemplate}
-								paginator
-								rows={9}
-							/>
+							<><DataView
+									value={favoriteMovies}
+									layout={'grid'}
+									itemTemplate={itemTemplate}
+									lazy
+									rows={5}
+									className="movies-dataview" /><style>{`
+								.movies-dataview .p-dataview-content {
+									background: transparent;
+								}
+
+								.movies-dataview .p-grid {
+									display: grid;
+									grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+									gap: 1.5rem;
+									margin: 0;
+								}
+
+								.movies-dataview .p-col-12 {
+									padding: 0;
+									width: 100%;
+								}
+
+								@media (max-width: 768px) {
+									.movies-dataview .p-grid {
+										grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+										gap: 1rem;
+									}
+								}
+							`}</style></>
 						)}
 					</div>
 				</div>

@@ -8,13 +8,7 @@ import FavoriteMovie from "../components/FavoriteMovie";
 
 export const Home = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const { logout, isAuthenticated, loginWithRedirect } = useAuth0();
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      loginWithRedirect();
-    }
-  }, [isAuthenticated, loginWithRedirect]);
+  const { logout } = useAuth0();
 
   const header = () => {
     return (
