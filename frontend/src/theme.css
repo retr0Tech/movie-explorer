@@ -341,6 +341,12 @@ body {
   border: 1px solid transparent !important;
   border-bottom: none !important;
   margin-right: 0.25rem !important;
+  color: var(--text-secondary) !important;
+  background: transparent !important;
+}
+
+.p-tabview .p-tabview-nav li .p-tabview-nav-link:hover {
+  background: var(--border-color-light) !important;
   color: var(--text-primary) !important;
 }
 
@@ -353,6 +359,7 @@ body {
   border-color: var(--border-color) !important;
   border-bottom: 1px solid var(--card-bg) !important;
   margin-bottom: -1px !important;
+  color: var(--text-primary) !important;
 }
 
 .p-tabview .p-tabview-panels {
