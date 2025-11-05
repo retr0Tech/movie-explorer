@@ -508,6 +508,147 @@ label {
 }
 
 /* ==========================================
+   Favorite Card Edit Button
+   ========================================== */
+.favorite-edit-btn {
+  position: absolute !important;
+  top: 0.75rem !important;
+  right: 0.75rem !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.3) 100%) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  z-index: 10 !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.favorite-edit-btn:hover {
+  transform: scale(1.1) !important;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(37, 99, 235, 0.5) 100%) !important;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4) !important;
+  border-color: rgba(59, 130, 246, 0.4) !important;
+}
+
+/* ==========================================
+   Dialog/Modal Customization
+   ========================================== */
+.p-dialog {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15) !important;
+}
+
+.p-dialog .p-dialog-header {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 1.25rem 1.5rem !important;
+}
+
+.p-dialog .p-dialog-content {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  padding: 0 1.5rem !important;
+}
+
+.p-dialog .p-dialog-footer {
+  background: var(--card-bg) !important;
+  border-top: 1px solid var(--border-color) !important;
+  padding: 1rem 1.5rem !important;
+}
+
+.p-inputtextarea {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.p-inputtextarea::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+/* ==========================================
+   Edit Favorite Form
+   ========================================== */
+.edit-favorite-form {
+  padding: 1.5rem 0;
+}
+
+.edit-favorite-form .form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.edit-favorite-form .form-field label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.edit-favorite-form .form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.edit-favorite-form .form-row .form-field {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .edit-favorite-form .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .edit-favorite-form .form-row .form-field {
+    margin-bottom: 1.25rem;
+  }
+
+  .edit-favorite-form .form-row .form-field:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* ==========================================
+   Rating Component
+   ========================================== */
+.p-rating .p-rating-icon {
+  color: var(--text-tertiary) !important;
+  transition: all 0.2s ease !important;
+  outline: none !important;
+}
+
+.p-rating .p-rating-icon.p-rating-icon-active {
+  color: #fbbf24 !important;
+}
+
+.p-rating:not(.p-disabled):not(.p-readonly) .p-rating-icon:hover {
+  color: #fde047 !important;
+}
+
+.p-rating .p-rating-icon:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.p-rating-item:focus {
+  outline: none !important;
+}
+
+.p-rating-item .p-focus {
+  box-shadow: none !important;
+}
+
+/* ==========================================
    Toast Customization
    ========================================== */
 .p-toast .p-toast-message {

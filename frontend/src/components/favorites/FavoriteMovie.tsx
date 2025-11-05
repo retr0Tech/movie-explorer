@@ -2,15 +2,17 @@ import { Panel } from 'primereact/panel';
 import { DataView } from 'primereact/dataview';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectFavoriteMovies } from '../store/movie/movie-slice';
-import { FavoriteMovie as FavoriteMovieModel } from '../models/favorites/favorite-movie';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { selectFavoriteMovies } from '../../store/movie/movie-slice';
+import { FavoriteMovie as FavoriteMovieModel } from '../../models/favorites/favorite-movie';
+import { UpdateFavorite } from '../../models/favorites/update-favorite-movie';
 import { useEffect, useState, useContext } from 'react';
-import { getFavoriteMoviesAsync } from '../store/movie/movie-slice';
-import * as movieService from '../services/movie-service';
+import { getFavoriteMoviesAsync } from '../../store/movie/movie-slice';
+import * as movieService from '../../services/movie-service';
 import { useAuth0 } from '@auth0/auth0-react';
 import { motion } from 'framer-motion';
-import { ToastContext } from '../App';
+import { ToastContext } from '../../App';
+import EditFavoriteModal from './EditFavoriteModal';
 
 export default function FavoriteMovie() {
 	const dispatch = useAppDispatch();
@@ -19,6 +21,8 @@ export default function FavoriteMovie() {
 	const toast = useContext(ToastContext);
 	const [heartAnimate, setHeartAnimate] = useState<string | null>(null);
 	const [loadedImages, setLoadedImages] = useState<{[key: string]: boolean}>({});
+	const [editModalVisible, setEditModalVisible] = useState(false);
+	const [selectedMovie, setSelectedMovie] = useState<FavoriteMovieModel | null>(null);
 	
 
 	// Optional: Fetch favorites from backend on component mount
@@ -58,6 +62,37 @@ export default function FavoriteMovie() {
 		}
 	};
 
+	const handleEditClick = (movie: FavoriteMovieModel) => {
+		setSelectedMovie(movie);
+		setEditModalVisible(true);
+	};
+
+	const handleSaveEdit = async (id: string, updates: UpdateFavorite) => {
+		try {
+			const token = await getAccessTokenSilently();
+			const updateService = movieService.updateFavorite();
+			await updateService(token, id, updates);
+
+			toast?.current?.show({
+				severity: 'success',
+				summary: 'Updated Successfully',
+				detail: 'Favorite movie details have been updated.',
+				life: 3000
+			});
+
+			// Refresh favorites list
+			dispatch(getFavoriteMoviesAsync(token));
+		} catch (error) {
+			console.error('Failed to update favorite:', error);
+			toast?.current?.show({
+				severity: 'error',
+				summary: 'Error',
+				detail: 'Failed to update favorite. Please try again.',
+				life: 4000
+			});
+		}
+	};
+
 	const itemTemplate = (movie: FavoriteMovieModel) => {
 		const index = favoriteMovies.findIndex(m => m.imdbId === movie.imdbId);
 		const imageLoaded = loadedImages[movie.imdbId] || false;
@@ -67,13 +102,23 @@ export default function FavoriteMovie() {
 		};
 
 		const header = (
-			<img
-				alt={movie.title}
-				src={movie.poster !== 'N/A' ? movie.poster : 'https://via.placeholder.com/300x450?text=No+Image'}
-				onLoad={() => handleImageLoad(movie.imdbId)}
-				className={imageLoaded ? "blur-load loaded" : "blur-load"}
-				style={{ width: '100%', height: '450px', objectFit: 'cover' }}
-			/>
+			<div style={{ position: 'relative' }}>
+				<img
+					alt={movie.title}
+					src={movie.poster !== 'N/A' ? movie.poster : 'https://via.placeholder.com/300x450?text=No+Image'}
+					onLoad={() => handleImageLoad(movie.imdbId)}
+					className={imageLoaded ? "blur-load loaded" : "blur-load"}
+					style={{ width: '100%', height: '450px', objectFit: 'cover' }}
+				/>
+				<Button
+					icon="pi pi-pencil"
+					className="favorite-edit-btn"
+					onClick={() => handleEditClick(movie)}
+					severity="info"
+					rounded
+					aria-label="Edit"
+				/>
+			</div>
 		);
 
 		const footer = (
@@ -83,6 +128,7 @@ export default function FavoriteMovie() {
 					label="Remove from Favorites"
 					className={`p-button-rounded p-button-danger ${heartAnimate === movie.imdbId ? "heart-animate" : ""}`}
 					onClick={() => handleRemoveFavorite(movie)}
+					style={{ width: '100%' }}
 				/>
 			</div>
 		);
@@ -167,6 +213,13 @@ export default function FavoriteMovie() {
 					</div>
 				</div>
 			</Panel>
+
+			<EditFavoriteModal
+				visible={editModalVisible}
+				movie={selectedMovie}
+				onHide={() => setEditModalVisible(false)}
+				onSave={handleSaveEdit}
+			/>
 		</div>
 	);
 }

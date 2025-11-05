@@ -1,7 +1,6 @@
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Movie } from "../../models/movies/movie";
-import { Link } from "react-router-dom";
 import noPosterImg from "../../no-poster.png";
 import { motion } from "framer-motion";
 import { useState } from "react";
