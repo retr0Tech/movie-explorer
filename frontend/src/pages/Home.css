@@ -7,16 +7,17 @@
 }
 
 .movie-explorer-header {
-  background: linear-gradient(to right, #fafafa 0%, #ffffff 100%);
-  border: 1px solid #e0e0e0;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1.5rem 2rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px var(--card-shadow);
+  transition: all 0.25s ease;
 }
 
 .movie-explorer-header .p-card-title {
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 1.75rem;
   font-weight: 600;
   margin: 0;
@@ -27,9 +28,28 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 400;
   font-size: 0.95rem;
+}
+
+.dark-mode-toggle {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 1.1rem;
+}
+
+.dark-mode-toggle:hover {
+  background: var(--bg-tertiary);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {

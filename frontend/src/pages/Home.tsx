@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Button } from "primereact/button";
 import { useAuth0 } from "@auth0/auth0-react";
 import MoviesExplorer from "../components/Movies/MoviesExplorer";
 import FavoriteMovie from "../components/FavoriteMovie";
 import { motion } from "framer-motion";
+import { DarkModeContext } from "../App";
 import "./Home.css";
 
 export const Home = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { logout, user } = useAuth0();
+  const darkModeContext = useContext(DarkModeContext);
 
   return (
     <motion.div
@@ -23,6 +25,13 @@ export const Home = () => {
           <h1 className="p-card-title">Movie Explorer</h1>
           <div className="user-section">
             <span>Hi, {user?.nickname}</span>
+            <button
+              className="dark-mode-toggle"
+              onClick={() => darkModeContext?.toggleDarkMode()}
+              title={darkModeContext?.darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              <i className={darkModeContext?.darkMode ? "pi pi-sun" : "pi pi-moon"}></i>
+            </button>
             <Button
               label='Sign Out'
               severity='secondary'

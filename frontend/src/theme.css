@@ -82,21 +82,53 @@
 
   /* Background */
   --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-glass: rgba(255, 255, 255, 0.7);
-  --bg-glass-dark: rgba(255, 255, 255, 0.1);
+  --bg-secondary: #f8f9fa;
+  --bg-tertiary: #fafafa;
+
+  /* Text */
+  --text-primary: #1a1a1a;
+  --text-secondary: #666;
+  --text-tertiary: #999;
+
+  /* Borders */
+  --border-color: #e0e0e0;
+  --border-color-light: #f0f0f0;
+
+  /* Cards */
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --card-shadow: rgba(0, 0, 0, 0.08);
+
+  /* Panel */
+  --panel-header-bg: #fafafa;
+  --panel-border: #e0e0e0;
 }
 
 /* ==========================================
-   Dark Mode Variables (for future use)
+   Dark Mode Variables
    ========================================== */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-glass: rgba(30, 41, 59, 0.8);
-    --bg-glass-dark: rgba(15, 23, 42, 0.6);
-  }
+.dark-mode {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2a2a2a;
+  --bg-tertiary: #333333;
+
+  /* Text */
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #808080;
+
+  /* Borders */
+  --border-color: #404040;
+  --border-color-light: #333333;
+
+  /* Cards */
+  --card-bg: #2a2a2a;
+  --card-border: #404040;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Panel */
+  --panel-header-bg: #333333;
+  --panel-border: #404040;
 }
 
 /* ==========================================
@@ -107,10 +139,12 @@
 }
 
 body {
-  background: #f8f9fa;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
+  transition: background-color var(--transition-base), color var(--transition-base);
 }
 
 #root {
@@ -122,16 +156,22 @@ body {
    Card Utilities
    ========================================== */
 .glass-card {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 8px var(--card-shadow);
   transition: all var(--transition-base);
 }
 
 .glass-strong {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: 0 2px 12px var(--card-shadow);
+}
+
+.p-card {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--card-border) !important;
 }
 
 /* ==========================================
@@ -250,9 +290,9 @@ body {
 .p-skeleton {
   background: linear-gradient(
     90deg,
-    #f0f0f0 0%,
-    #f8f8f8 50%,
-    #f0f0f0 100%
+    var(--border-color-light) 0%,
+    var(--bg-tertiary) 50%,
+    var(--border-color-light) 100%
   );
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s ease-in-out infinite;
@@ -284,15 +324,15 @@ body {
    Tab View Enhancements
    ========================================== */
 .p-tabview {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
 }
 
 .p-tabview .p-tabview-nav {
-  background: #fafafa !important;
-  border-bottom: 1px solid #e0e0e0 !important;
+  background: var(--bg-tertiary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
   padding: 0.5rem 1rem 0 1rem !important;
 }
 
@@ -301,6 +341,7 @@ body {
   border: 1px solid transparent !important;
   border-bottom: none !important;
   margin-right: 0.25rem !important;
+  color: var(--text-primary) !important;
 }
 
 .p-tabview .p-tabview-nav li .p-tabview-nav-link .p-tabview-left-icon {
@@ -308,14 +349,14 @@ body {
 }
 
 .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  background: white !important;
-  border-color: #e0e0e0 !important;
-  border-bottom: 1px solid white !important;
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  border-bottom: 1px solid var(--card-bg) !important;
   margin-bottom: -1px !important;
 }
 
 .p-tabview .p-tabview-panels {
-  background: white !important;
+  background: var(--card-bg) !important;
   padding: 1.5rem !important;
 }
 
@@ -328,16 +369,28 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bg-tertiary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--border-color);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--text-tertiary);
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
 }
 
 /* ==========================================
@@ -356,16 +409,36 @@ body {
 /* ==========================================
    Panel Customization
    ========================================== */
+.p-panel {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+}
+
 .p-panel .p-panel-header {
-  background: #fafafa !important;
-  border-color: #e0e0e0 !important;
+  background: var(--panel-header-bg) !important;
+  border-color: var(--border-color) !important;
   font-weight: 600 !important;
-  color: #333 !important;
+  color: var(--text-primary) !important;
   padding: 1rem 1.25rem !important;
 }
 
 .p-panel .p-panel-content {
   padding: 1.5rem 1.25rem !important;
+  background: var(--card-bg) !important;
+}
+
+.p-inputtext {
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.p-inputtext::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+label {
+  color: var(--text-primary);
 }
 
 /* ==========================================
@@ -374,7 +447,7 @@ body {
 .p-dataview .p-dataview-emptymessage {
   padding: 3rem !important;
   text-align: center;
-  color: #999 !important;
+  color: var(--text-tertiary) !important;
   font-size: 1rem;
 }
 
