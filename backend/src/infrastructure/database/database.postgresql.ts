@@ -44,8 +44,23 @@ export class PostgresDatabase {
           file.endsWith('.orm-entity.js')
         ) {
           // If it matches the entity file format, load it
-          // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-member-access
-          entities.push(require(fullPath).default);
+          // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment
+          const entityModule = require(fullPath);
+
+          // Handle both default and named exports
+          if (entityModule.default) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            entities.push(entityModule.default);
+          } else {
+            // For named exports, push all exported classes
+            Object.keys(entityModule).forEach((key) => {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+              if (typeof entityModule[key] === 'function') {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                entities.push(entityModule[key]);
+              }
+            });
+          }
         }
       });
     } catch (error) {

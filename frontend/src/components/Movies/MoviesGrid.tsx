@@ -6,7 +6,7 @@ import * as movieService from '../../services/movie-service';
 import { ProgressSpinner } from 'primereact/progressspinner';
 
 export default function MoviesGrid({movies, totalRecords, currentPage, isLoading, onPageChange}: {movies: Movie[], totalRecords: number, currentPage: number, isLoading: boolean, onPageChange: Function}) {
-	const { getAccessTokenSilently, user} = useAuth0();
+	const { getAccessTokenSilently} = useAuth0();
 
 	const handleToggleFavorite = async (movie: Movie) => {
 		// Update Redux store optimistically

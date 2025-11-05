@@ -132,12 +132,13 @@ export class MoviesService {
     }
 
     // Use AI to generate recommendations
-    const recommendations = await this.aiRecommendationService.getMovieRecommendations(
-      movieDetails.Title,
-      movieDetails.Year,
-      movieDetails.Genre,
-      movieDetails.Plot,
-    );
+    const recommendations =
+      await this.aiRecommendationService.getMovieRecommendations(
+        movieDetails.Title,
+        movieDetails.Year,
+        movieDetails.Genre,
+        movieDetails.Plot,
+      );
 
     return {
       movie: {

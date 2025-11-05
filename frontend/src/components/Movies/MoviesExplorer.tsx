@@ -1,5 +1,4 @@
 import { Button } from 'primereact/button'
-import { FloatLabel } from 'primereact/floatlabel';
 import { InputText } from 'primereact/inputtext'
 import { Panel } from 'primereact/panel'
 import { useState } from 'react'
@@ -12,7 +11,7 @@ export default function MoviesExplorer() {
 	const dispatch = useAppDispatch();
 	const movies = useAppSelector(selectMovies);
 	const totalRecords = useAppSelector(selectTotalMovies);
-	const { getAccessTokenSilently, user} = useAuth0();
+	const { getAccessTokenSilently} = useAuth0();
 	const [title, setTitle] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
 	const [page, setPage] = useState(0);
@@ -44,10 +43,10 @@ export default function MoviesExplorer() {
 		<div>
 		<Panel header="Search Movie By Title" style={{marginBottom: '20px'}}>
 			<div className='movie-explorer'>
-				<FloatLabel>
-					<InputText id="title" value={title} onChange={(e) => setTitle(e.target.value)}></InputText>
-					<label htmlFor="Title">Title</label>
-				</FloatLabel>
+				<div className="flex flex-column gap-2">
+						<label htmlFor="username">Title</label>
+						<InputText id="title" title='Title' value={title} onChange={(e) => setTitle(e?.target?.value)}/>
+				</div>
 				<div className='movie-explorer-options'>
 					<Button label='Search' onClick={() => {handleSearch(1)}}></Button>
 					<Button label='Reset' severity='secondary' onClick={handleReset}></Button>

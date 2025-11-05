@@ -32,8 +32,9 @@ export const getMoviesAsync = (
                 year: parseInt(movie.Year),
                 imdbID: movie.imdbID,
                 type: movie.Type as MovieType,
-                poster: movie.Poster
-            }));
+                poster: movie.Poster,
+                isFavorite: false
+            } as MovieResponse));
             const totalRecords = Number(moviesResponse.data.totalResults)
             dispatch(setTotalMovies(totalRecords))
             dispatch(setMovies(movieResponses));

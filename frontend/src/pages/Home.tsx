@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
@@ -8,12 +8,12 @@ import FavoriteMovie from "../components/FavoriteMovie";
 
 export const Home = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const { logout } = useAuth0();
+  const { logout, user } = useAuth0();
 
   const header = () => {
     return (
-      <div style={{position: 'absolute', right: '10px', top: '12px'}}>
-        <Button label='Sign Out' severity='secondary' onClick={() => logout()}></Button>
+      <div style={{position: 'absolute', right: '10px', top: '12px', display: 'flex', gap: '15px'}}>
+        <p>Hi, {user?.nickname}</p><Button label='Sign Out' severity='secondary' onClick={() => logout()}></Button>
       </div>
     )
   }

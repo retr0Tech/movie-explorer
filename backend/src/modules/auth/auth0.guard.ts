@@ -6,23 +6,11 @@ import {
 } from '@nestjs/common';
 import { auth } from 'express-oauth2-jwt-bearer';
 import { ConfigService } from '@nestjs/config';
-import { promisify } from 'util';
 import { Request, Response, NextFunction } from 'express';
 
-// Extend Express Request type to include auth0 properties
-interface Auth0Payload {
-  sub: string;
-  email?: string;
-  permissions?: string[];
-  [key: string]: unknown;
-}
-
 interface RequestWithAuth extends Request {
-  auth0?: Auth0Payload;
   user?: {
     userId: string;
-    email?: string;
-    permissions: string[];
   };
 }
 
@@ -46,19 +34,35 @@ export class Auth0Guard implements CanActivate {
     const response = context.switchToHttp().getResponse<Response>();
 
     try {
-      await promisify(this.jwtCheck)(request, response);
+      // Wrap middleware in Promise instead of using promisify
+      await new Promise<void>((resolve, reject) => {
+        this.jwtCheck(request, response, (err?: any) => {
+          if (err) {
+            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
 
       // Extract user info from the token payload
-      if (request.auth0) {
+      if (request.auth) {
+        const authPayload = request.auth;
+
+        // Extract userId from 'sub' field (format: "auth0|69085eab581799cf1f72e67f")
+        const userId = authPayload.payload.sub;
+
         request.user = {
-          userId: request.auth0.sub,
-          email: request.auth0.email,
-          permissions: request.auth0.permissions || [],
+          userId: userId ?? '',
         };
+      } else {
+        console.warn('Auth payload is missing from request');
       }
 
       return true;
     } catch (error) {
+      console.error('Auth0 authentication error:', error);
       throw new UnauthorizedException(
         `Invalid or missing authentication token ${error}`,
       );
