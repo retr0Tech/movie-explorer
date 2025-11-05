@@ -3,10 +3,13 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { Movie } from '../../models/movies/movie';
 import MovieGridItem from './MovieGridItem';
 import * as movieService from '../../services/movie-service';
-import { ProgressSpinner } from 'primereact/progressspinner';
+import { useContext } from 'react';
+import { ToastContext } from '../../App';
+import MoviesGridSkeleton from './MoviesGridSkeleton';
 
 export default function MoviesGrid({movies, totalRecords, currentPage, isLoading, onPageChange}: {movies: Movie[], totalRecords: number, currentPage: number, isLoading: boolean, onPageChange: Function}) {
 	const { getAccessTokenSilently} = useAuth0();
+	const toast = useContext(ToastContext);
 
 	const handleToggleFavorite = async (movie: Movie) => {
 		// Update Redux store optimistically
@@ -36,6 +39,13 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 						actors: details.Actors || '',
 						runtime: details.Runtime || ''
 					});
+
+					toast?.current?.show({
+						severity: 'success',
+						summary: 'Added to Favorites',
+						detail: `${movie.title} has been added to your favorites!`,
+						life: 3000
+					});
 				}
 			} else {
 				// Remove from favorites
@@ -51,35 +61,51 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 					if (favorite) {
 						const deleteService = movieService.deleteFavorite();
 						await deleteService(favorite.id, token);
+
+						toast?.current?.show({
+							severity: 'info',
+							summary: 'Removed from Favorites',
+							detail: `${movie.title} has been removed from your favorites.`,
+							life: 3000
+						});
 					}
 				}
 			}
 		} catch (error) {
 			console.error('Failed to sync favorite with backend:', error);
+			toast?.current?.show({
+				severity: 'error',
+				summary: 'Error',
+				detail: 'Failed to update favorites. Please try again.',
+				life: 4000
+			});
 		}
 	};
 
 	const itemTemplate = (movie: Movie) => {
-		return <MovieGridItem movie={movie} onToggleFavorite={handleToggleFavorite} />;
+		const index = movies.findIndex(m => m.imdbID === movie.imdbID);
+		return <MovieGridItem movie={movie} onToggleFavorite={handleToggleFavorite} index={index} />;
 	};
 
 	return (
 		<div className="dataview-demo">
-			<DataView
-				value={movies}
-				layout={'grid'}
-				itemTemplate={itemTemplate}
-				lazy
-				paginator
-				rows={10}
-				loading={isLoading}
-				loadingIcon={<ProgressSpinner style={{ width: '50px', height: '50px' }} />}
-				totalRecords={totalRecords}
-				emptyMessage="No movies found"
-				onPage={(event) => {onPageChange(event)}}
-				first={currentPage}
-				className="movies-dataview"
-			/>
+			{isLoading ? (
+				<MoviesGridSkeleton />
+			) : (
+				<DataView
+					value={movies}
+					layout={'grid'}
+					itemTemplate={itemTemplate}
+					lazy
+					paginator
+					rows={10}
+					totalRecords={totalRecords}
+					emptyMessage="No movies found"
+					onPage={(event) => {onPageChange(event)}}
+					first={currentPage}
+					className="movies-dataview"
+				/>
+			)}
 			<style>{`
 				.movies-dataview .p-dataview-content {
 					background: transparent;

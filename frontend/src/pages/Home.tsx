@@ -1,41 +1,67 @@
 import { useState } from "react";
 import { TabView, TabPanel } from "primereact/tabview";
-import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { useAuth0 } from "@auth0/auth0-react";
 import MoviesExplorer from "../components/Movies/MoviesExplorer";
 import FavoriteMovie from "../components/FavoriteMovie";
+import { motion } from "framer-motion";
+import "./Home.css";
 
 export const Home = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { logout, user } = useAuth0();
 
-  const header = () => {
-    return (
-      <div style={{position: 'absolute', right: '10px', top: '12px', display: 'flex', gap: '15px'}}>
-        <p>Hi, {user?.nickname}</p><Button label='Sign Out' severity='secondary' onClick={() => logout()}></Button>
-      </div>
-    )
-  }
-
   return (
-    <div className="Home">
-      <div className="card">
-        <Card title='Movie Explorer' header={header}></Card>
+    <motion.div
+      className="Home"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      <div className="movie-explorer-header">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1 className="p-card-title">Movie Explorer</h1>
+          <div className="user-section">
+            <span>Hi, {user?.nickname}</span>
+            <Button
+              label='Sign Out'
+              severity='secondary'
+              onClick={() => logout()}
+            ></Button>
+          </div>
+        </div>
       </div>
       <TabView
         className="tabview-header-icon"
         activeIndex={activeIndex}
         onTabChange={(e) => setActiveIndex(e.index)}
       >
-        <TabPanel header="Search movies" leftIcon="pi pi-list">
+        <TabPanel header={
+          <div className="flex items-center">
+            <i className="pi pi-list" style={{marginRight: '10px'}}/>
+            <span>Search movies</span>
+          </div>
+        }>
           <MoviesExplorer></MoviesExplorer>
         </TabPanel>
-        <TabPanel header="Favorites" leftIcon="pi pi-star">
+        <TabPanel header={
+          <div className="flex items-center">
+            <i className="pi pi-star" style={{marginRight: '10px'}}/>
+            <span>Favorites</span>
+          </div>
+        }>
           <FavoriteMovie></FavoriteMovie>
         </TabPanel>
+        <TabPanel header={
+          <div className="flex items-center">
+            <i className="pi pi-crown" style={{marginRight: '10px'}}/>
+            <span>Recomendations</span>
+          </div>
+        }>
+
+        </TabPanel>
       </TabView>
-    </div>
+    </motion.div>
   );
 };
 

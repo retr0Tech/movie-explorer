@@ -41,15 +41,30 @@ export default function MoviesExplorer() {
 
 	return (
 		<div>
-		<Panel header="Search Movie By Title" style={{marginBottom: '20px'}}>
+		<Panel header="Search Movies" style={{marginBottom: '1.5rem', border: '1px solid #e0e0e0', borderRadius: '8px'}}>
 			<div className='movie-explorer'>
-				<div className="flex flex-column gap-2">
-						<label htmlFor="username">Title</label>
-						<InputText id="title" title='Title' value={title} onChange={(e) => setTitle(e?.target?.value)}/>
-				</div>
 				<div className='movie-explorer-options'>
-					<Button label='Search' onClick={() => {handleSearch(1)}}></Button>
-					<Button label='Reset' severity='secondary' onClick={handleReset}></Button>
+						<InputText
+							id="title"
+							placeholder="Enter movie title..."
+							value={title}
+							onChange={(e) => setTitle(e?.target?.value)}
+							onKeyDown={(e) => e.key === 'Enter' && handleSearch(1)}
+							style={{ width: '100%' }}
+						/>
+					<Button
+						label='Search'
+						icon="pi pi-search"
+						onClick={() => {handleSearch(1)}}
+						loading={isLoading}
+					></Button>
+					<Button
+						label='Reset'
+						icon="pi pi-times"
+						severity='secondary'
+						onClick={handleReset}
+						disabled={isLoading}
+					></Button>
 				</div>
 			</div>
 		</Panel>

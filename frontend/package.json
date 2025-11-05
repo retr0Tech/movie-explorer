@@ -13,6 +13,8 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "framer-motion": "^12.23.24",
+    "primeicons": "^7.0.0",
     "primereact": "^10.9.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

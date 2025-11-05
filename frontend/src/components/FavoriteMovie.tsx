@@ -4,16 +4,21 @@ import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { selectFavoriteMovies } from '../store/movie/movie-slice';
-import { Movie } from '../models/movies/movie';
-import { useEffect } from 'react';
+import { FavoriteMovie as FavoriteMovieModel } from '../models/favorites/favorite-movie';
+import { useEffect, useState, useContext } from 'react';
 import { getFavoriteMoviesAsync } from '../store/movie/movie-slice';
 import * as movieService from '../services/movie-service';
 import { useAuth0 } from '@auth0/auth0-react';
+import { motion } from 'framer-motion';
+import { ToastContext } from '../App';
 
 export default function FavoriteMovie() {
 	const dispatch = useAppDispatch();
-	const { getAccessTokenSilently, user} = useAuth0();
+	const { getAccessTokenSilently } = useAuth0();
 	const favoriteMovies = useAppSelector(selectFavoriteMovies);
+	const toast = useContext(ToastContext);
+	const [heartAnimate, setHeartAnimate] = useState<string | null>(null);
+	const [loadedImages, setLoadedImages] = useState<{[key: string]: boolean}>({});
 	
 
 	// Optional: Fetch favorites from backend on component mount
@@ -24,21 +29,49 @@ export default function FavoriteMovie() {
 		});
 	}, [dispatch, getAccessTokenSilently]);
 
-	const handleRemoveFavorite = async (movie: Movie) => {
+	const handleRemoveFavorite = async (movie: FavoriteMovieModel) => {
 		try {
+			setHeartAnimate(movie.imdbId);
+			setTimeout(() => setHeartAnimate(null), 500);
+
 			const token = await getAccessTokenSilently();
 			const deleteService = movieService.deleteFavorite();
-			await deleteService(movie.imdbID, token);
+			await deleteService(movie.imdbId, token);
+
+			toast?.current?.show({
+				severity: 'info',
+				summary: 'Removed from Favorites',
+				detail: `${movie.title} has been removed from your favorites.`,
+				life: 3000
+			});
+
+			// Refresh favorites list
+			dispatch(getFavoriteMoviesAsync(token));
 		} catch (error) {
 			console.error('Failed to remove favorite from backend:', error);
+			toast?.current?.show({
+				severity: 'error',
+				summary: 'Error',
+				detail: 'Failed to remove from favorites. Please try again.',
+				life: 4000
+			});
 		}
 	};
 
-	const itemTemplate = (movie: Movie) => {
+	const itemTemplate = (movie: FavoriteMovieModel) => {
+		const index = favoriteMovies.findIndex(m => m.imdbId === movie.imdbId);
+		const imageLoaded = loadedImages[movie.imdbId] || false;
+
+		const handleImageLoad = (imdbId: string) => {
+			setLoadedImages(prev => ({ ...prev, [imdbId]: true }));
+		};
+
 		const header = (
 			<img
 				alt={movie.title}
 				src={movie.poster !== 'N/A' ? movie.poster : 'https://via.placeholder.com/300x450?text=No+Image'}
+				onLoad={() => handleImageLoad(movie.imdbId)}
+				className={imageLoaded ? "blur-load loaded" : "blur-load"}
 				style={{ width: '100%', height: '450px', objectFit: 'cover' }}
 			/>
 		);
@@ -48,24 +81,37 @@ export default function FavoriteMovie() {
 				<Button
 					icon="pi pi-heart-fill"
 					label="Remove from Favorites"
-					className="p-button-rounded p-button-danger"
+					className={`p-button-rounded p-button-danger ${heartAnimate === movie.imdbId ? "heart-animate" : ""}`}
 					onClick={() => handleRemoveFavorite(movie)}
 				/>
 			</div>
 		);
 
 		return (
-			<div className="col-12 md:col-6 lg:col-4">
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{
+					duration: 0.3,
+					delay: index * 0.05,
+					ease: "easeOut"
+				}}
+				className="col-12 md:col-6 lg:col-4 hover-lift"
+			>
 				<Card
 					title={movie.title}
-					subTitle={`${movie.year} • ${movie.type}`}
+					subTitle={`${movie.year}${movie.genre ? ` • ${movie.genre}` : ''}`}
 					footer={footer}
 					header={header}
-					className="movie-card"
+					className="movie-card glass-card"
+					style={{
+						borderRadius: "8px",
+					}}
 				>
-					<p className="m-0">IMDb ID: {movie.imdbID}</p>
+					<p className="m-0">IMDb ID: {movie.imdbId}</p>
+					{movie.imdbRating && <p className="m-0">Rating: {movie.imdbRating}</p>}
 				</Card>
-			</div>
+			</motion.div>
 		);
 	};
 
