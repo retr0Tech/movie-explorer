@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import Anthropic from '@anthropic-ai/sdk';
+import { HfInference } from '@huggingface/inference';
 import { ConfigService } from '@nestjs/config';
 
 export interface MovieRecommendation {
@@ -10,18 +10,16 @@ export interface MovieRecommendation {
 
 @Injectable()
 export class AIRecommendationService {
-  private anthropic: Anthropic;
+  private hf: HfInference;
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('ANTHROPIC_API_KEY');
+    const apiKey = this.configService.get<string>('HF_API_KEY');
     if (!apiKey) {
       console.warn(
-        'ANTHROPIC_API_KEY not configured. AI recommendations will not work.',
+        'HF_API_KEY not configured. AI recommendations will not work.',
       );
     }
-    this.anthropic = new Anthropic({
-      apiKey: apiKey || 'placeholder',
-    });
+    this.hf = new HfInference(apiKey || 'placeholder');
   }
 
   async getMovieRecommendations(
@@ -38,21 +36,22 @@ export class AIRecommendationService {
         moviePlot,
       );
 
-      const message = await this.anthropic.messages.create({
-        model: 'claude-3-5-haiku-20241022',
-        max_tokens: 1024,
+      const response = await this.hf.chatCompletion({
+        model: 'meta-llama/Llama-3.2-3B-Instruct',
         messages: [
           {
             role: 'user',
             content: prompt,
           },
         ],
+        max_tokens: 1024,
+        temperature: 0.7,
       });
 
       // Parse the response
-      const content = message.content[0];
-      if (content.type === 'text') {
-        return this.parseRecommendations(content.text);
+      const content = response.choices[0]?.message?.content;
+      if (content) {
+        return this.parseRecommendations(content);
       }
 
       return [];
