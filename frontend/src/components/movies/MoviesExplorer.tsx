@@ -4,7 +4,7 @@ import { Panel } from 'primereact/panel'
 import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { getFavoriteMoviesAsync, getMoviesAsync, selectMovies, selectTotalMovies, setMovies, setTotalMovies } from '../../store/movie/movie-slice';
-import MoviesGrid from './MoviesGrid';
+import MoviesGrid from '../movies/MoviesGrid';
 import { useAuth0 } from '@auth0/auth0-react';
 
 export default function MoviesExplorer() {
