@@ -67,14 +67,14 @@ export const moviesSlice = createSlice({
     reducers: {
         setMovies: (state, action: PayloadAction<MovieResponse[]>) => {
             const movies: Movie[] = action.payload.map((movieResponse) => {
-                return new Movie(
-                    movieResponse.title as string,
-                    movieResponse.year,
-                    movieResponse.imdbID as string,
-                    movieResponse.type,
-                    movieResponse.poster as string,
-                    state.favoriteMovies.map(x => x.imdbId).includes(movieResponse.imdbID)
-                );
+                return {
+                    title: movieResponse.title as string,
+                    year: movieResponse.year,
+                    imdbID: movieResponse.imdbID as string,
+                    type: movieResponse.type,
+                    poster: movieResponse.poster as string,
+                    isFavorite: state.favoriteMovies.map(x => x.imdbId).includes(movieResponse.imdbID)
+                };
             });
             state.movies = movies;
         },

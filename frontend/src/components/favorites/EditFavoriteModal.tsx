@@ -3,9 +3,11 @@ import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { Button } from 'primereact/button';
 import { Rating } from 'primereact/rating';
+import * as movieService from '../../services/movie-service';
 import { useState, useEffect } from 'react';
 import { FavoriteMovie } from '../../models/favorites/favorite-movie';
 import { UpdateFavorite } from '../../models/favorites/update-favorite-movie';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface EditFavoriteModalProps {
   visible: boolean;
@@ -32,6 +34,9 @@ export default function EditFavoriteModal({
     runtime: '',
   });
   const [isSaving, setIsSaving] = useState(false);
+  const getFavoriteMovieByImdbId = movieService.getFavoriteMovieByImdbId();
+	const { getAccessTokenSilently } = useAuth0();
+  
 
   useEffect(() => {
     if (movie) {
@@ -71,7 +76,9 @@ export default function EditFavoriteModal({
 
     setIsSaving(true);
     try {
-      await onSave(movie.imdbId, formData);
+      const token = await getAccessTokenSilently();
+			const favMovie = await getFavoriteMovieByImdbId(movie.imdbId, token);
+      await onSave(favMovie.data.id, formData);
       onHide();
     } catch (error) {
       console.error('Failed to update favorite:', error);
@@ -219,3 +226,7 @@ export default function EditFavoriteModal({
     </Dialog>
   );
 }
+function getAccessTokenSilently() {
+  throw new Error('Function not implemented.');
+}
+

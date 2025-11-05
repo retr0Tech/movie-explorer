@@ -23,6 +23,8 @@ export default function FavoriteMovie() {
 	const [loadedImages, setLoadedImages] = useState<{[key: string]: boolean}>({});
 	const [editModalVisible, setEditModalVisible] = useState(false);
 	const [selectedMovie, setSelectedMovie] = useState<FavoriteMovieModel | null>(null);
+	const getFavoriteMovieByImdbId = movieService.getFavoriteMovieByImdbId();
+	
 	
 
 	// Optional: Fetch favorites from backend on component mount
@@ -40,7 +42,9 @@ export default function FavoriteMovie() {
 
 			const token = await getAccessTokenSilently();
 			const deleteService = movieService.deleteFavorite();
-			await deleteService(movie.imdbId, token);
+			// Remove from favorites
+			const favMovie = await getFavoriteMovieByImdbId(movie.imdbId, token);
+			await deleteService(favMovie.data.id, token);
 
 			toast?.current?.show({
 				severity: 'info',
