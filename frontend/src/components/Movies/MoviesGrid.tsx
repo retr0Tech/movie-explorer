@@ -6,28 +6,29 @@ import * as movieService from '../../services/movie-service';
 import { useContext } from 'react';
 import { ToastContext } from '../../App';
 import MoviesGridSkeleton from './MoviesGridSkeleton';
+import { FavoriteMovie as FavoriteMovieModel } from '../../models/favorites/favorite-movie';
+import { useAppDispatch } from '../../store/hooks';
+import { getFavoriteMoviesAsync, setMovies } from '../../store/movie/movie-slice';
 
 export default function MoviesGrid({movies, totalRecords, currentPage, isLoading, onPageChange}: {movies: Movie[], totalRecords: number, currentPage: number, isLoading: boolean, onPageChange: Function}) {
 	const { getAccessTokenSilently} = useAuth0();
+	const dispatch = useAppDispatch();
 	const toast = useContext(ToastContext);
+	const setFavoriteMovie = movieService.markAsFavorite();
+	const deleteFavoriteMovie = movieService.deleteFavorite();
+	const getFavoriteMovieByImdbId = movieService.getFavoriteMovieByImdbId();
 
 	const handleToggleFavorite = async (movie: Movie) => {
 		// Update Redux store optimistically
 		const token = await getAccessTokenSilently();
-		const updatedMovie = { ...movie, isFavorite: !movie.isFavorite };
-
 		// Sync with backend
 		try {
-
-			if (updatedMovie.isFavorite) {
+			if (!movie.isFavorite) {
 				// Add to favorites - first fetch full movie details
 				const movieDetailsService = movieService.getMovieById();
 				const movieDetailsResponse = await movieDetailsService(movie.imdbID, token);
-
-				if (movieDetailsResponse.success && movieDetailsResponse.data) {
-					const details = movieDetailsResponse.data;
-					const markService = movieService.markAsFavorite();
-					await markService(token, {
+				const details = movieDetailsResponse.data;
+				await setFavoriteMovie(token, {
 						imdbId: movie.imdbID,
 						title: details.Title || movie.title,
 						year: details.Year || movie.year.toString(),
@@ -38,7 +39,7 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 						director: details.Director || '',
 						actors: details.Actors || '',
 						runtime: details.Runtime || ''
-					});
+					} as FavoriteMovieModel);
 
 					toast?.current?.show({
 						severity: 'success',
@@ -46,30 +47,16 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 						detail: `${movie.title} has been added to your favorites!`,
 						life: 3000
 					});
-				}
 			} else {
 				// Remove from favorites
-				// First, get the backend favorite ID
-				const getFavoritesService = movieService.getFavoriteMovies();
-				const favoritesResponse = await getFavoritesService(token);
-
-				if (favoritesResponse.success && favoritesResponse.data) {
-					const favorite = favoritesResponse.data.find(
-						(fav: any) => fav.imdbId === movie.imdbID
-					);
-
-					if (favorite) {
-						const deleteService = movieService.deleteFavorite();
-						await deleteService(favorite.id, token);
-
-						toast?.current?.show({
-							severity: 'info',
-							summary: 'Removed from Favorites',
-							detail: `${movie.title} has been removed from your favorites.`,
-							life: 3000
-						});
-					}
-				}
+				const favMovie = await getFavoriteMovieByImdbId(movie.imdbID, token);
+				await deleteFavoriteMovie(favMovie.data.id, token);
+				toast?.current?.show({
+					severity: 'info',
+					summary: 'Removed from Favorites',
+					detail: `${movie.title} has been removed from your favorites.`,
+					life: 3000
+				});
 			}
 		} catch (error) {
 			console.error('Failed to sync favorite with backend:', error);
@@ -79,6 +66,10 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 				detail: 'Failed to update favorites. Please try again.',
 				life: 4000
 			});
+		}
+		finally{
+			await dispatch(getFavoriteMoviesAsync(token));
+			await dispatch(setMovies(movies));
 		}
 	};
 

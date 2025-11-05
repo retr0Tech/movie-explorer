@@ -26,6 +26,13 @@ export const getFavoriteMovies = () => {
     }
 };
 
+export const getFavoriteMovieByImdbId = () => {
+    const _get = baseService.get<FavoriteMovieResponse>();
+    return async (movieId: string, token: string,) => {
+        return await _get(`favorites/imdbId/${movieId}`, {'Authorization': `Bearer ${token}`});
+    }
+};
+
 export const getFavoriteMovieById = () => {
     const _get = baseService.get<FavoriteMovieResponse>();
     return async (token: string, movieId: string) => {

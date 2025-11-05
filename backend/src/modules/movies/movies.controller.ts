@@ -41,6 +41,13 @@ export class MoviesController {
   async getFavorites(@User('userId') userId: string) {
     return this.moviesService.getFavorites(userId);
   }
+  @Get('favorites/imdbId/:imdbId')
+  async getFavoriteByImdbId(
+    @Param('imdbId') imdbId: string,
+    @User('userId') userId: string,
+  ) {
+    return this.moviesService.getFavoriteByImdbId(imdbId, userId);
+  }
 
   @Get('favorites/:id')
   async getFavoriteById(

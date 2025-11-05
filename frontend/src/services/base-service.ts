@@ -30,6 +30,7 @@ const request = <T, K>(): (
                     if (!res.ok) {
                         throw JSON.stringify(await res.json());
                     }
+                    if(res.status === 204) return null;
                     return res.json();
                 })
                 .then((result) => {

@@ -48,23 +48,8 @@ export default function MovieGridItem({
           display: "flex",
           flexDirection: "column",
         }}
+        title={movie.title.slice(0, 43)}
       >
-        <div className="movie-card-header">
-          <Link to={{ pathname: `` }} className="no-style">
-            <h3
-              className="p-card-title"
-              style={{
-                cursor: "pointer",
-                outline: "none",
-                marginBottom: "1rem",
-                fontSize: "1.1rem",
-                fontWeight: "600",
-              }}
-            >
-              {movie.title}
-            </h3>
-          </Link>
-        </div>
         <div className="movie-card-content" style={{ flex: 1 }}>
           <img
             onError={(e) => ((e.target as any).src = defaultImg)}

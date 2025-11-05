@@ -32,6 +32,21 @@ export class MoviesService {
     return favorites.map(this.mapToResponseDto);
   }
 
+  async getFavoriteByImdbId(
+    imdbId: string,
+    userId: string,
+  ): Promise<FavoriteResponseDto> {
+    const favorite = await this.favoriteRepository.findOne({
+      where: { imdbId, userId },
+    });
+
+    if (!favorite) {
+      throw new NotFoundException('Favorite movie not found');
+    }
+
+    return this.mapToResponseDto(favorite);
+  }
+
   async getFavoriteById(
     id: string,
     userId: string,

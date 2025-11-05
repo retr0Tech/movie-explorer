@@ -449,6 +449,55 @@ label {
 }
 
 /* ==========================================
+   Paginator
+   ========================================== */
+.p-paginator {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border-color: transparent !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page:hover {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background: var(--primary-500) !important;
+  color: white !important;
+  border-color: var(--primary-500) !important;
+}
+
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last {
+  background: transparent !important;
+  color: var(--text-primary) !important;
+  border-color: transparent !important;
+}
+
+.p-paginator .p-paginator-first:hover,
+.p-paginator .p-paginator-prev:hover,
+.p-paginator .p-paginator-next:hover,
+.p-paginator .p-paginator-last:hover {
+  background: var(--bg-tertiary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.p-paginator .p-dropdown {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ==========================================
    Empty State
    ========================================== */
 .p-dataview .p-dataview-emptymessage {

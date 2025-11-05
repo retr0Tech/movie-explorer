@@ -3,7 +3,7 @@ import { InputText } from 'primereact/inputtext'
 import { Panel } from 'primereact/panel'
 import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { getMoviesAsync, selectMovies, selectTotalMovies, setMovies, setTotalMovies } from '../../store/movie/movie-slice';
+import { getFavoriteMoviesAsync, getMoviesAsync, selectMovies, selectTotalMovies, setMovies, setTotalMovies } from '../../store/movie/movie-slice';
 import MoviesGrid from './MoviesGrid';
 import { useAuth0 } from '@auth0/auth0-react';
 
@@ -22,6 +22,7 @@ export default function MoviesExplorer() {
 		if (title.trim()) {
 			setIsLoading(true);
 			const token = await getAccessTokenSilently();
+			await dispatch(getFavoriteMoviesAsync(token));
 			await dispatch(getMoviesAsync(title.trim(), page, token));
 			setIsLoading(false);
 		}
