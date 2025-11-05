@@ -2,6 +2,7 @@ import { FavoriteMovie } from "../models/favorites/favorite-movie";
 import { FavoriteMovieResponse } from "../models/favorites/favorite-movie-response";
 import { UpdateFavorite } from "../models/favorites/update-favorite-movie";
 import { OmdbSearchResponseDto, OmdbMovieDetailDto } from "../models/movies/movie-response";
+import { RecommendationResponse } from "../models/recommendations/recommendation-response";
 import * as baseService from "./base-service";
 
 export const getMovie = () => {
@@ -58,5 +59,12 @@ export const deleteFavorite = () => {
     const deleteRes = baseService._delete<void>();
     return async (id: string, token: string) => {
         return await deleteRes(`favorites/${id}`, {'Authorization': `Bearer ${token}`});
+    }
+};
+
+export const getRecommendations = () => {
+    const _get = baseService.get<RecommendationResponse>();
+    return async (imdbId: string, token: string) => {
+        return await _get(`recommendations/${imdbId}`, {'Authorization': `Bearer ${token}`});
     }
 };

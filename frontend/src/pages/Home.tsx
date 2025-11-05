@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { useAuth0 } from "@auth0/auth0-react";
 import MoviesExplorer from "../components/movies/MoviesExplorer";
 import FavoriteMovie from "../components/favorites/FavoriteMovie";
+import Recommendations from "../components/recommendations/Recommendations";
 import { motion } from "framer-motion";
 import { DarkModeContext } from "../App";
 import "./Home.css";
@@ -63,11 +64,11 @@ export const Home = () => {
         </TabPanel>
         <TabPanel header={
           <div className="flex items-center">
-            <i className="pi pi-crown" style={{marginRight: '10px'}}/>
-            <span>Recomendations</span>
+            <i className="pi pi-sparkles" style={{marginRight: '10px'}}/>
+            <span>Recommendations</span>
           </div>
         }>
-
+          <Recommendations></Recommendations>
         </TabPanel>
       </TabView>
     </motion.div>
