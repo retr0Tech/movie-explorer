@@ -18,6 +18,9 @@ export class PostgresDatabase {
       entities,
       synchronize: true, // Auto-create schema for development/testing
       logging: true, // Enable logging to debug queries
+      ssl: {
+        rejectUnauthorized: false, // Render uses self-signed certs
+      },
     };
   }
 
