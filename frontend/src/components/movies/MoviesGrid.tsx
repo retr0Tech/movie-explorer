@@ -19,7 +19,7 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 	const deleteFavoriteMovie = movieService.deleteFavorite();
 	const getFavoriteMovieByImdbId = movieService.getFavoriteMovieByImdbId();
 
-	const handleToggleFavorite = async (movie: Movie): Promise<boolean> => {
+	const handleToggleFavorite = async (movie: Movie) => {
 		const token = await getAccessTokenSilently();
 		try {
 			if (!movie.isFavorite) {
@@ -64,7 +64,6 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 					life: 3000
 				});
 			}
-			return true;
 		} catch (error) {
 			console.error('Failed to sync favorite with backend:', error);
 			toast?.current?.show({
@@ -73,7 +72,6 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 				detail: 'Failed to update favorites. Please try again.',
 				life: 4000
 			});
-			return false;
 		}
 	};
 

@@ -8,7 +8,7 @@ import MovieModal from "./MovieModal";
 
 interface MovieGridItemProps {
   movie: Movie;
-  onToggleFavorite?: (movie: Movie) => Promise<boolean>;
+  onToggleFavorite?: (movie: Movie) => void;
   index?: number;
 }
 
@@ -21,21 +21,14 @@ export default function MovieGridItem({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [heartAnimate, setHeartAnimate] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleToggleFavorite = () => {
     if (onToggleFavorite) {
       setHeartAnimate(true);
       setTimeout(() => setHeartAnimate(false), 500);
-      onToggleFavorite(movie).then((result) => {
-        setIsFavorite(result);
-      });
+      onToggleFavorite(movie)
     }
   };
-
-  useEffect(() => {
-    setIsFavorite(movie.isFavorite);
-  }, [movie]);
 
   return (
     <motion.div
@@ -93,11 +86,11 @@ export default function MovieGridItem({
             style={{ width: "100%" }}
           />
           <Button
-            icon={isFavorite ? "pi pi-heart-fill" : "pi pi-heart"}
+            icon={movie.isFavorite ? "pi pi-heart-fill" : "pi pi-heart"}
             label={
-              isFavorite ? "Remove from Favorites" : "Add to Favorites"
+              movie.isFavorite ? "Remove from Favorites" : "Add to Favorites"
             }
-            severity={ isFavorite ? "danger" : "info"}
+            severity={ movie.isFavorite ? "danger" : "info"}
             className={`p-button-rounded ${heartAnimate ? "heart-animate" : ""}`}
             onClick={handleToggleFavorite}
             style={{ width: "100%" }}
@@ -109,7 +102,7 @@ export default function MovieGridItem({
         visible={showModal}
         onHide={() => setShowModal(false)}
         imdbId={movie.imdbID}
-        isFavorite={isFavorite}
+        isFavorite={movie.isFavorite}
         onToggleFavorite={() => {
           handleToggleFavorite();
           setShowModal(false);
