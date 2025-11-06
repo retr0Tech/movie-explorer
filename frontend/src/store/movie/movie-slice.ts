@@ -43,7 +43,8 @@ export const getMoviesAsync = (
 }
 
 export const getFavoriteMoviesAsync = (
-    token?: string
+    token?: string,
+    filter?: string
 ): AppThunk<Promise<void>> => {
     return async (dispatch) => {
         const authToken = token;
@@ -53,10 +54,10 @@ export const getFavoriteMoviesAsync = (
             return;
         }
 
-        const getFavoritesService = movieService.getFavoriteMovies();
-        const favoritesResponse = await getFavoritesService(authToken);
+        const getFavoritesService = movieService.getFavoriteMoviesPaginated();
+        const favoritesResponse = await getFavoritesService(authToken, 1, 10, filter ?? '');
         if (favoritesResponse.success && favoritesResponse.data) {
-            dispatch(setFavoriteMovies(favoritesResponse.data));
+            dispatch(setFavoriteMovies(favoritesResponse.data.data));
         }
     };
 }

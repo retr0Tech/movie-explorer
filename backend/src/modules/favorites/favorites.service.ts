@@ -5,11 +5,12 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Favorite } from './entities/favorite.orm-entity';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 import { FavoriteResponseDto } from './dto/favorite-response.dto';
+import { PaginatedFavoritesResponseDto } from './dto/paginated-favorites-response.dto';
 
 @Injectable()
 export class FavoritesService {
@@ -18,14 +19,41 @@ export class FavoritesService {
     private readonly favoriteRepository: Repository<Favorite>,
   ) {}
 
-  async getFavorites(userId: string): Promise<FavoriteResponseDto[]> {
-    const favorites = await this.favoriteRepository.find({
-      where: { userId },
+  async getFavorites(
+    userId: string,
+    page = 1,
+    limit = 10,
+    filter?: string,
+  ): Promise<PaginatedFavoritesResponseDto> {
+    // Ensure positive values
+    const currentPage = Math.max(1, page);
+    const itemsPerPage = Math.max(1, Math.min(100, limit)); // Max 100 items per page
+
+    const skip = (currentPage - 1) * itemsPerPage;
+    const whereCondition = {
+      userId,
+    };
+    if (filter && filter !== '') whereCondition['title'] = Like(`${filter}%`);
+
+    const [favorites, total] = await this.favoriteRepository.findAndCount({
+      where: whereCondition,
       order: { createdAt: 'DESC' },
+      skip,
+      take: itemsPerPage,
     });
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    return favorites.map(this.mapToResponseDto);
+    const totalPages = Math.ceil(total / itemsPerPage);
+
+    return {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      data: favorites.map(this.mapToResponseDto),
+      total,
+      page: currentPage,
+      limit: itemsPerPage,
+      totalPages,
+      hasNextPage: currentPage < totalPages,
+      hasPreviousPage: currentPage > 1,
+    };
   }
 
   async getFavoriteByImdbId(

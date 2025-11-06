@@ -173,51 +173,6 @@ export default function MovieModal({
                 )}
               </div>
             )}
-
-            {movieDetails.aiAnalysis && (
-              <div className="ai-review-section">
-                <div className="ai-review-header">
-                  <i className="pi pi-sparkles"></i>
-                  <h3>AI Generated Review</h3>
-                </div>
-
-                <div className={`sentiment-badge sentiment-${movieDetails.aiAnalysis.overallSentiment}`}>
-                  <i className={`pi ${
-                    movieDetails.aiAnalysis.overallSentiment === 'positive' ? 'pi-thumbs-up' :
-                    movieDetails.aiAnalysis.overallSentiment === 'negative' ? 'pi-thumbs-down' :
-                    'pi-minus'
-                  }`}></i>
-                  <span>{movieDetails.aiAnalysis.overallSentiment.toUpperCase()}</span>
-                  <span className="sentiment-score">{movieDetails.aiAnalysis.sentimentScore}%</span>
-                </div>
-
-                <div className="ai-summary">
-                  <p>{movieDetails.aiAnalysis.summary}</p>
-                </div>
-
-                <div className="reception-grid">
-                  <div className="reception-item">
-                    <strong><i className="pi pi-users"></i> Audience</strong>
-                    <p>{movieDetails.aiAnalysis.audienceReception}</p>
-                  </div>
-                  <div className="reception-item">
-                    <strong><i className="pi pi-pencil"></i> Critics</strong>
-                    <p>{movieDetails.aiAnalysis.criticsReception}</p>
-                  </div>
-                </div>
-
-                {movieDetails.aiAnalysis.keyInsights.length > 0 && (
-                  <div className="key-insights">
-                    <strong>Key Insights:</strong>
-                    <ul>
-                      {movieDetails.aiAnalysis.keyInsights.map((insight, index) => (
-                        <li key={index}>{insight}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
 
           <div className="modal-details-section">
@@ -298,6 +253,51 @@ export default function MovieModal({
                 </div>
               )}
             </div>
+
+            {movieDetails.aiAnalysis && (
+              <div className="ai-review-section">
+                <div className="ai-review-header">
+                  <i className="pi pi-sparkles"></i>
+                  <h3>AI Generated Review</h3>
+                </div>
+
+                <div className={`sentiment-badge sentiment-${movieDetails.aiAnalysis.overallSentiment}`}>
+                  <i className={`pi ${
+                    movieDetails.aiAnalysis.overallSentiment === 'positive' ? 'pi-thumbs-up' :
+                    movieDetails.aiAnalysis.overallSentiment === 'negative' ? 'pi-thumbs-down' :
+                    'pi-minus'
+                  }`}></i>
+                  <span>{movieDetails.aiAnalysis.overallSentiment.toUpperCase()}</span>
+                  <span className="sentiment-score">{movieDetails.aiAnalysis.sentimentScore}%</span>
+                </div>
+
+                <div className="ai-summary">
+                  <p>{movieDetails.aiAnalysis.summary}</p>
+                </div>
+
+                <div className="reception-grid">
+                  <div className="reception-item">
+                    <strong><i className="pi pi-users"></i> Audience</strong>
+                    <p>{movieDetails.aiAnalysis.audienceReception}</p>
+                  </div>
+                  <div className="reception-item">
+                    <strong><i className="pi pi-pencil"></i> Critics</strong>
+                    <p>{movieDetails.aiAnalysis.criticsReception}</p>
+                  </div>
+                </div>
+
+                {movieDetails.aiAnalysis.keyInsights.length > 0 && (
+                  <div className="key-insights">
+                    <strong>Key Insights:</strong>
+                    <ul>
+                      {movieDetails.aiAnalysis.keyInsights.map((insight, index) => (
+                        <li key={index}>{insight}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}

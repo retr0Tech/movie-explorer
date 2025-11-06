@@ -34,6 +34,21 @@ export const getFavoriteMovies = () => {
     }
 };
 
+export const getFavoriteMoviesPaginated = () => {
+    const _get = baseService.get<{
+        data: FavoriteMovieResponse[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        hasNextPage: boolean;
+        hasPreviousPage: boolean;
+    }>();
+    return async (token: string, page: number = 1, limit: number = 10, filter: string) => {
+        return await _get(`favorites?page=${page}&limit=${limit}&filter=${filter}`, {'Authorization': `Bearer ${token}`});
+    }
+};
+
 export const getFavoriteMovieByImdbId = () => {
     const _get = baseService.get<FavoriteMovieResponse>();
     return async (movieId: string, token: string,) => {

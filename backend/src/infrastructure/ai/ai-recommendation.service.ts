@@ -224,16 +224,16 @@ Only return the JSON object, no additional text.`;
   private parseRatingAnalysis(text: string): MovieRatingAnalysis {
     try {
       // Try to extract JSON from the response
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
+      try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const parsed = JSON.parse(jsonMatch[0]);
+        const parsed = JSON.parse(
+          text[text.length - 1] === '}' ? text : `${text}}`,
+        );
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return parsed;
+      } catch {
+        return this.getDefaultAnalysis();
       }
-
-      console.warn('Could not parse rating analysis response');
-      return this.getDefaultAnalysis();
     } catch (error) {
       console.error('Error parsing rating analysis:', error);
       return this.getDefaultAnalysis();

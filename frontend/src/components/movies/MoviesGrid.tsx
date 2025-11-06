@@ -69,7 +69,7 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 			});
 		}
 		finally{
-			await dispatch(getFavoriteMoviesAsync(token));
+			await dispatch(getFavoriteMoviesAsync(token, movie.title));
 			await dispatch(setMovies(movies));
 		}
 	};

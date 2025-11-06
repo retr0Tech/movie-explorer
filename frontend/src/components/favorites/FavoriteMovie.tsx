@@ -2,13 +2,13 @@ import { Panel } from 'primereact/panel';
 import { DataView } from 'primereact/dataview';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { selectFavoriteMovies } from '../../store/movie/movie-slice';
+import { useAppDispatch } from '../../store/hooks';
 import { FavoriteMovie as FavoriteMovieModel } from '../../models/favorites/favorite-movie';
 import { UpdateFavorite } from '../../models/favorites/update-favorite-movie';
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useContext, useCallback } from 'react';
 import { getFavoriteMoviesAsync } from '../../store/movie/movie-slice';
 import * as movieService from '../../services/movie-service';
+import noPosterImg from "../../no-poster.png";
 import { useAuth0 } from '@auth0/auth0-react';
 import { motion } from 'framer-motion';
 import { ToastContext } from '../../App';
@@ -17,18 +17,64 @@ import EditFavoriteModal from './EditFavoriteModal';
 export default function FavoriteMovie() {
 	const dispatch = useAppDispatch();
 	const { getAccessTokenSilently } = useAuth0();
-	const favoriteMovies = useAppSelector(selectFavoriteMovies);
 	const toast = useContext(ToastContext);
 	const [heartAnimate, setHeartAnimate] = useState<string | null>(null);
 	const [loadedImages, setLoadedImages] = useState<{[key: string]: boolean}>({});
 	const [editModalVisible, setEditModalVisible] = useState(false);
 	const [selectedMovie, setSelectedMovie] = useState<FavoriteMovieModel | null>(null);
+	const [currentPage, setCurrentPage] = useState(0); // DataView uses 0-indexed pages
+	const [totalRecords, setTotalRecords] = useState(0);
+	const [isLoading, setIsLoading] = useState(false);
+	const [displayedMovies, setDisplayedMovies] = useState<FavoriteMovieModel[]>([]);
 	const getFavoriteMovieByImdbId = movieService.getFavoriteMovieByImdbId();
-	
-	
+	const ITEMS_PER_PAGE = 10;
 
-	// Optional: Fetch favorites from backend on component mount
-	// Uncomment when authentication/token is available
+	const fetchFavorites = useCallback(async (page: number) => {
+		try {
+			setIsLoading(true);
+			const token = await getAccessTokenSilently();
+			const getFavoritesPaginated = movieService.getFavoriteMoviesPaginated();
+			const response = await getFavoritesPaginated(token, page + 1, ITEMS_PER_PAGE, ''); // API uses 1-indexed pages
+
+			if (response.success && response.data) {
+				const movies: FavoriteMovieModel[] = response.data.data.map(fav => ({
+					id: fav.id,
+					userId: fav.userId,
+					imdbId: fav.imdbId,
+					title: fav.title,
+					year: fav.year,
+					poster: fav.poster,
+					genre: fav.genre,
+					plot: fav.plot,
+					imdbRating: fav.imdbRating,
+					director: fav.director,
+					actors: fav.actors,
+					runtime: fav.runtime,
+					createdAt: fav.createdAt,
+					updatedAt: fav.updatedAt
+				}));
+				setDisplayedMovies(movies);
+				setTotalRecords(response.data.total);
+			}
+		} catch (error) {
+			console.error('Failed to fetch favorites:', error);
+			toast?.current?.show({
+				severity: 'error',
+				summary: 'Error',
+				detail: 'Failed to load favorites. Please try again.',
+				life: 4000
+			});
+		} finally {
+			setIsLoading(false);
+		}
+	}, [getAccessTokenSilently, toast]);
+
+	// Fetch favorites on mount and when page changes
+	useEffect(() => {
+		fetchFavorites(currentPage);
+	}, [currentPage, fetchFavorites]);
+
+	// Also update Redux store for other components
 	useEffect(() => {
 		getAccessTokenSilently().then(token => {
 			dispatch(getFavoriteMoviesAsync(token));
@@ -53,7 +99,8 @@ export default function FavoriteMovie() {
 				life: 3000
 			});
 
-			// Refresh favorites list
+			// Refresh current page and Redux store
+			await fetchFavorites(currentPage);
 			dispatch(getFavoriteMoviesAsync(token));
 		} catch (error) {
 			console.error('Failed to remove favorite from backend:', error);
@@ -84,7 +131,8 @@ export default function FavoriteMovie() {
 				life: 3000
 			});
 
-			// Refresh favorites list
+			// Refresh current page and Redux store
+			await fetchFavorites(currentPage);
 			dispatch(getFavoriteMoviesAsync(token));
 		} catch (error) {
 			console.error('Failed to update favorite:', error);
@@ -97,8 +145,12 @@ export default function FavoriteMovie() {
 		}
 	};
 
+	const handlePageChange = (event: { page: number; first: number }) => {
+		setCurrentPage(event.page);
+	};
+
 	const itemTemplate = (movie: FavoriteMovieModel) => {
-		const index = favoriteMovies.findIndex(m => m.imdbId === movie.imdbId);
+		const index = displayedMovies.findIndex(m => m.imdbId === movie.imdbId);
 		const imageLoaded = loadedImages[movie.imdbId] || false;
 
 		const handleImageLoad = (imdbId: string) => {
@@ -109,7 +161,8 @@ export default function FavoriteMovie() {
 			<div style={{ position: 'relative' }}>
 				<img
 					alt={movie.title}
-					src={movie.poster !== 'N/A' ? movie.poster : 'https://via.placeholder.com/300x450?text=No+Image'}
+					onError={(e) => ((e.target as any).src = noPosterImg)}
+					src={movie.poster !== "N/A" ? movie.poster : noPosterImg}
 					onLoad={() => handleImageLoad(movie.imdbId)}
 					className={imageLoaded ? "blur-load loaded" : "blur-load"}
 					style={{ width: '100%', height: '450px', objectFit: 'cover' }}
@@ -177,18 +230,27 @@ export default function FavoriteMovie() {
 
 	return (
 		<div>
-			<Panel header={`My Favorite Movies (${favoriteMovies.length})`}>
+			<Panel header={`My Favorite Movies (${totalRecords})`}>
 				<div className="dataview-demo">
 					<div className="card">
-						{favoriteMovies.length === 0 ? (
+						{isLoading && displayedMovies.length === 0 ? (
+							<div className="flex flex-column align-items-center justify-content-center" style={{ minHeight: '300px' }}>
+								<i className="pi pi-spin pi-spinner" style={{ fontSize: '3rem', color: 'var(--primary-500)' }}></i>
+								<p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Loading favorites...</p>
+							</div>
+						) : totalRecords === 0 ? (
 							emptyTemplate()
 						) : (
 							<><DataView
-									value={favoriteMovies}
+									value={displayedMovies}
 									layout={'grid'}
 									itemTemplate={itemTemplate}
 									lazy
-									rows={5}
+									paginator
+									rows={ITEMS_PER_PAGE}
+									totalRecords={totalRecords}
+									first={currentPage * ITEMS_PER_PAGE}
+									onPage={handlePageChange}
 									className="movies-dataview" /><style>{`
 								.movies-dataview .p-dataview-content {
 									background: transparent;

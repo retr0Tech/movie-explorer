@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
   ValidationPipe,
   HttpCode,
@@ -17,6 +18,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { FavoritesService } from './favorites.service';
 import { Auth0Guard } from '../auth/auth0.guard';
@@ -24,6 +26,7 @@ import { User } from '../auth/decorators/user.decorator';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { UpdateFavoriteDto } from './dto/update-favorite.dto';
 import { FavoriteResponseDto } from './dto/favorite-response.dto';
+import { PaginatedFavoritesResponseDto } from './dto/paginated-favorites-response.dto';
 
 @ApiTags('favorites')
 @ApiBearerAuth('JWT-auth')
@@ -34,16 +37,43 @@ export class FavoritesController {
 
   @ApiOperation({
     summary: 'Get all favorites',
-    description: 'Get all favorite movies for the authenticated user',
+    description:
+      'Get paginated favorite movies for the authenticated user. Supports pagination with page and limit query parameters.',
+  })
+  @ApiQuery({
+    name: 'page',
+    description: 'Page number (default: 1)',
+    required: false,
+    example: 1,
+    type: Number,
+  })
+  @ApiQuery({
+    name: 'limit',
+    description: 'Number of items per page (default: 10, max: 100)',
+    required: false,
+    example: 10,
+    type: Number,
   })
   @ApiResponse({
     status: 200,
     description: 'Favorites retrieved successfully',
-    type: [FavoriteResponseDto],
+    type: PaginatedFavoritesResponseDto,
   })
   @Get()
-  async getFavorites(@User('userId') userId: string) {
-    return this.favoritesService.getFavorites(userId);
+  async getFavorites(
+    @User('userId') userId: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('filter') filter?: string,
+  ) {
+    const pageNumber = page ? Number(page) : 1;
+    const limitNumber = limit ? Number(limit) : 10;
+    return this.favoritesService.getFavorites(
+      userId,
+      pageNumber,
+      limitNumber,
+      filter,
+    );
   }
 
   @ApiOperation({
