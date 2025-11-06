@@ -60,42 +60,40 @@ docker-compose down -v  # Stop + remove data
 
 ### Option 2: Traditional Setup
 
-See [SETUP.md](./SETUP.md) for detailed instructions.
-
 ## Documentation
 
-- **[📖 Complete Setup Guide](./SETUP.md)** - Detailed setup instructions for both Docker and traditional methods
 - **[🧪 Test Documentation](./TEST_SUMMARY.md)** - Comprehensive testing guide with 41 passing tests
 - **[🔧 API Documentation](http://localhost:3000/api)** - Swagger docs (when backend is running)
 
-## Quick Commands
+## Environment Variables
+- Step 1
+in the frontend directory incert the .env file in /option 2/frontend directory in the google drive link shared in the email
 
+-Step 2
+in the backend directory incert the .env file in /option 2/backend directory in the google drive link shared in the email
+
+## steps
+NOTE: an instance of postgre needs to be running
 ```bash
-# Start the application
-./start.sh
+# 1. Clone the repository
+git clone https://github.com/retr0Tech/movie-explorer.git
 
-# Stop the application
-./stop.sh
+cd movie-explorer
+cd frontend
+npm i
+npm start
 
-# View logs
-docker-compose logs -f
-
-# Restart a service
-docker-compose restart backend
-
-# Access database
-docker-compose exec postgres psql -U postgres -d movie_explorer
 ```
 
-## Environment Variables
+in a separate command line
 
-**Important**: A fully configured `.env` file will be provided to you via email. Place it in the root directory: `movie-explorer/.env`
+```bash
+cd movie-explorer
+cd backend
+npm i
+npm run start:dev
 
-The .env file includes:
-- **Auth0** - Authentication configuration
-- **OMDB API** - Movie database access
-- **Google Gemini** - AI-powered movie analysis
-- **Database** - PostgreSQL connection settings
+```
 
 ## Project Structure
 

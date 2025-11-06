@@ -18,9 +18,12 @@ export class PostgresDatabase {
       entities,
       synchronize: true, // Auto-create schema for development/testing
       logging: true, // Enable logging to debug queries
-      ssl: {
-        rejectUnauthorized: false, // Render uses self-signed certs
-      },
+      ssl:
+        this.configService.get<string>('DB_HOST') !== 'postgres'
+          ? {
+              rejectUnauthorized: false, // Render uses self-signed certs
+            }
+          : false,
     };
   }
 

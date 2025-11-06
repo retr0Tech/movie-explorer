@@ -36,7 +36,7 @@ export const Home = () => {
             <Button
               label='Sign Out'
               severity='secondary'
-              onClick={() => logout()}
+              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
             ></Button>
           </div>
         </div>

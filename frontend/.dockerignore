@@ -34,7 +34,6 @@ src/**/*.spec.tsx
 Dockerfile
 .dockerignore
 docker-compose.yml
-nginx.conf
 
 # Misc
 *.log
