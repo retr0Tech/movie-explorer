@@ -1,8 +1,6 @@
 # Test Summary
 
 ## Overview
-Comprehensive unit tests have been added to both backend and frontend of the Movie Explorer application.
-
 ## Backend Tests (23 tests, 100% pass rate)
 
 ### 1. Movies Service Tests (`movies.service.spec.ts`)
