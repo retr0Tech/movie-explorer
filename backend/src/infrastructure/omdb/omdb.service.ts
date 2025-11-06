@@ -37,7 +37,10 @@ export class OmdbService {
         }),
       );
 
-      if (response.data.Response === 'False') {
+      if (
+        response.data.Response === 'False' &&
+        response.data.Error != 'Movie not found!'
+      ) {
         throw new HttpException('Movie not found', HttpStatus.NOT_FOUND);
       }
 

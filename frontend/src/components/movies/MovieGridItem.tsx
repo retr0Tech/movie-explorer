@@ -4,6 +4,7 @@ import { Movie } from "../../models/movies/movie";
 import noPosterImg from "../../no-poster.png";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import MovieModal from "./MovieModal";
 
 interface MovieGridItemProps {
   movie: Movie;
@@ -19,6 +20,7 @@ export default function MovieGridItem({
   const defaultImg = noPosterImg;
   const [imageLoaded, setImageLoaded] = useState(false);
   const [heartAnimate, setHeartAnimate] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const handleToggleFavorite = () => {
     if (onToggleFavorite) {
@@ -74,7 +76,15 @@ export default function MovieGridItem({
             IMDb ID: {movie.imdbID}
           </p>
         </div>
-        <div className="movie-card-footer" style={{ marginTop: "1rem" }}>
+        <div className="movie-card-footer" style={{ marginTop: "1rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          <Button
+            icon="pi pi-info-circle"
+            label="View Details"
+            severity="secondary"
+            className="p-button-rounded"
+            onClick={() => setShowModal(true)}
+            style={{ width: "100%" }}
+          />
           <Button
             icon={movie.isFavorite ? "pi pi-heart-fill" : "pi pi-heart"}
             label={
@@ -87,6 +97,17 @@ export default function MovieGridItem({
           />
         </div>
       </Card>
+
+      <MovieModal
+        visible={showModal}
+        onHide={() => setShowModal(false)}
+        imdbId={movie.imdbID}
+        isFavorite={movie.isFavorite}
+        onToggleFavorite={() => {
+          handleToggleFavorite();
+          setShowModal(false);
+        }}
+      />
     </motion.div>
   );
 }

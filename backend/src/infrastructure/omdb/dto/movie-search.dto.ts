@@ -10,6 +10,7 @@ export interface OmdbSearchResponseDto {
   Search: OmdbMovieDto[];
   totalResults: string;
   Response: string;
+  Error: string;
 }
 
 export interface OmdbMovieDetailDto {

@@ -731,10 +731,43 @@ label {
   color: var(--text-tertiary) !important;
 }
 
-.p-dropdown-filter {
+.p-dropdown-panel .p-dropdown-filter {
   background: var(--card-bg) !important;
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
+}
+
+.p-dropdown-panel .p-dropdown-filter-container {
+  background: var(--card-bg) !important;
+}
+
+.p-dropdown-panel .p-dropdown-filter-container .p-inputtext {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.p-dropdown-panel .p-dropdown-filter-container input {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.p-dropdown-panel .p-dropdown-filter-container .p-inputtext::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+.p-dropdown-panel .p-dropdown-filter-container input::placeholder {
+  color: var(--text-tertiary) !important;
+}
+
+.p-dropdown-panel .p-dropdown-filter-icon {
+  color: var(--text-secondary) !important;
+}
+
+.p-dropdown-panel .p-dropdown-header {
+  background: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
 }
 
 /* ==========================================

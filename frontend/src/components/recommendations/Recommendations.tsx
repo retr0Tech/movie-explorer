@@ -1,7 +1,8 @@
 import { Panel } from 'primereact/panel';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
-import { useState, useContext } from 'react';
+import { Dropdown } from 'primereact/dropdown';
+import { useState, useContext, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useAppSelector } from '../../store/hooks';
 import { selectFavoriteMovies } from '../../store/movie/movie-slice';
@@ -15,15 +16,17 @@ export default function Recommendations() {
   const { getAccessTokenSilently } = useAuth0();
   const favoriteMovies = useAppSelector(selectFavoriteMovies);
   const toast = useContext(ToastContext);
+  const [selectedMovie, setSelectedMovie] = useState<FavoriteMovie | null>(null);
   const [currentMovie, setCurrentMovie] = useState<FavoriteMovie | null>(null);
   const [recommendations, setRecommendations] = useState<MovieRecommendation[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const getRandomMovie = (): FavoriteMovie | null => {
-    if (favoriteMovies.length === 0) return null;
-    const randomIndex = Math.floor(Math.random() * favoriteMovies.length);
-    return favoriteMovies[randomIndex];
-  };
+  // Set first favorite as default selection when favorites load
+  useEffect(() => {
+    if (favoriteMovies.length > 0 && !selectedMovie) {
+      setSelectedMovie(favoriteMovies[0]);
+    }
+  }, [favoriteMovies, selectedMovie]);
 
   const handleGetRecommendations = async () => {
     if (favoriteMovies.length === 0) {
@@ -36,22 +39,29 @@ export default function Recommendations() {
       return;
     }
 
-    const randomMovie = getRandomMovie();
-    if (!randomMovie) return;
+    if (!selectedMovie) {
+      toast?.current?.show({
+        severity: 'warn',
+        summary: 'No Movie Selected',
+        detail: 'Please select a favorite movie to get recommendations.',
+        life: 3000
+      });
+      return;
+    }
 
-    setCurrentMovie(randomMovie);
+    setCurrentMovie(selectedMovie);
     setLoading(true);
     try {
       const token = await getAccessTokenSilently();
       const recommendationService = movieService.getRecommendations();
-      const response = await recommendationService(randomMovie.imdbId, token);
+      const response = await recommendationService(selectedMovie.imdbId, token);
 
       if (response.success && response.data) {
         setRecommendations(response.data.recommendations);
         toast?.current?.show({
           severity: 'success',
           summary: 'Recommendations Loaded',
-          detail: `Found ${response.data.recommendations.length} recommendations based on ${randomMovie.title}`,
+          detail: `Found ${response.data.recommendations.length} recommendations based on ${selectedMovie.title}`,
           life: 3000
         });
       }
@@ -68,12 +78,33 @@ export default function Recommendations() {
     }
   };
 
+  const movieOptionTemplate = (option: FavoriteMovie) => {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <i className="pi pi-star-fill" style={{ fontSize: '0.8rem', color: '#fbbf24' }}></i>
+        <span>{option.title} ({option.year})</span>
+      </div>
+    );
+  };
+
+  const selectedMovieTemplate = (option: FavoriteMovie | null) => {
+    if (!option) {
+      return <span>Select a favorite movie...</span>;
+    }
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <i className="pi pi-star-fill" style={{ fontSize: '0.8rem', color: '#fbbf24' }}></i>
+        <span>{option.title} ({option.year})</span>
+      </div>
+    );
+  };
+
   const emptyTemplate = () => {
     return (
       <div className="flex flex-column align-items-center justify-content-center" style={{ minHeight: '300px' }}>
         <i className="pi pi-sparkles" style={{ fontSize: '4rem', color: '#ccc', marginBottom: '1rem' }}></i>
         <h3>Get AI-Powered Recommendations</h3>
-        <p>Click the button below to get movie recommendations based on one of your favorites!</p>
+        <p>Select a favorite movie above and click the button below to get personalized recommendations!</p>
       </div>
     );
   };
@@ -139,6 +170,31 @@ export default function Recommendations() {
   return (
     <div>
       <Panel header="AI-Powered Movie Recommendations">
+        <div style={{ marginBottom: '1.5rem' }}>
+          <label htmlFor="movie-select" style={{
+            display: 'block',
+            marginBottom: '0.5rem',
+            fontWeight: '500',
+            color: 'var(--text-primary)'
+          }}>
+            Select a favorite movie to get recommendations:
+          </label>
+          <Dropdown
+            id="movie-select"
+            value={selectedMovie}
+            onChange={(e) => setSelectedMovie(e.value)}
+            options={favoriteMovies}
+            optionLabel="title"
+            placeholder="Select a favorite movie..."
+            filter
+            filterBy="title"
+            itemTemplate={movieOptionTemplate}
+            valueTemplate={selectedMovieTemplate}
+            style={{ width: '100%' }}
+            disabled={loading}
+          />
+        </div>
+
         {currentMovie && (
           <div className="recommendation-source" style={{
             background: 'var(--bg-tertiary)',
@@ -175,7 +231,7 @@ export default function Recommendations() {
             icon="pi pi-sparkles"
             onClick={handleGetRecommendations}
             loading={loading}
-            disabled={loading}
+            disabled={loading || !selectedMovie}
             size="large"
           />
         </div>

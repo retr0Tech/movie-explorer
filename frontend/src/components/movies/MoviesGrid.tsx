@@ -9,6 +9,7 @@ import MoviesGridSkeleton from './MoviesGridSkeleton';
 import { FavoriteMovie as FavoriteMovieModel } from '../../models/favorites/favorite-movie';
 import { useAppDispatch } from '../../store/hooks';
 import { getFavoriteMoviesAsync, setMovies } from '../../store/movie/movie-slice';
+import { motion } from 'framer-motion';
 
 export default function MoviesGrid({movies, totalRecords, currentPage, isLoading, onPageChange}: {movies: Movie[], totalRecords: number, currentPage: number, isLoading: boolean, onPageChange: Function}) {
 	const { getAccessTokenSilently} = useAuth0();
@@ -78,10 +79,44 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 		return <MovieGridItem movie={movie} onToggleFavorite={handleToggleFavorite} index={index} />;
 	};
 
+	const emptyTemplate = () => {
+		return (
+			<motion.div
+				className="flex flex-column align-items-center justify-content-center"
+				style={{ minHeight: '400px', padding: '2rem' }}
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ duration: 0.4 }}
+			>
+				<motion.i
+					className="pi pi-search"
+					style={{ fontSize: '5rem', color: 'var(--text-tertiary)', marginBottom: '1.5rem', opacity: 0.5 }}
+					animate={{
+						scale: [1, 1.1, 1],
+					}}
+					transition={{
+						duration: 2,
+						repeat: Infinity,
+						ease: "easeInOut"
+					}}
+				></motion.i>
+				<h2 style={{ color: 'var(--text-primary)', marginBottom: '0.75rem', fontSize: '1.5rem', textAlign: 'center' }}>No Movies Found</h2>
+				<p style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem', textAlign: 'center', maxWidth: '400px', margin: '0 auto 0.5rem auto' }}>
+					We couldn't find any movies matching your search.
+				</p>
+				<p style={{ color: 'var(--text-tertiary)', fontSize: '0.9rem', textAlign: 'center', margin: 0 }}>
+					Try searching with a different title or keyword.
+				</p>
+			</motion.div>
+		);
+	};
+
 	return (
 		<div className="dataview-demo">
 			{isLoading ? (
 				<MoviesGridSkeleton />
+			) : movies.length === 0 ? (
+				emptyTemplate()
 			) : (
 				<DataView
 					value={movies}
@@ -91,7 +126,6 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 					paginator
 					rows={10}
 					totalRecords={totalRecords}
-					emptyMessage="No movies found"
 					onPage={(event) => {onPageChange(event)}}
 					first={currentPage}
 					className="movies-dataview"
