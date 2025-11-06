@@ -5,8 +5,8 @@ import { Tag } from "primereact/tag";
 import { Chip } from "primereact/chip";
 import { useState, useEffect } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { OmdbMovieDetailDto } from "../../models/movies/movie-response";
-import { getMovieById } from "../../services/movie-service";
+import { OmdbMovieDetailWithAnalysisDto } from "../../models/movies/movie-response";
+import { getMovieByIdWithAnalysis } from "../../services/movie-service";
 import noPosterImg from "../../no-poster.png";
 import "./MovieModal.css";
 
@@ -25,7 +25,7 @@ export default function MovieModal({
   isFavorite,
   onToggleFavorite,
 }: MovieModalProps) {
-  const [movieDetails, setMovieDetails] = useState<OmdbMovieDetailDto | null>(
+  const [movieDetails, setMovieDetails] = useState<OmdbMovieDetailWithAnalysisDto | null>(
     null
   );
   const [loading, setLoading] = useState(false);
@@ -41,7 +41,7 @@ export default function MovieModal({
 
       try {
         const token = await getAccessTokenSilently();
-        const response = await getMovieById()(imdbId, token);
+        const response = await getMovieByIdWithAnalysis()(imdbId, token);
 
         if (response.success && response.data) {
           setMovieDetails(response.data);
@@ -170,6 +170,51 @@ export default function MovieModal({
                   <span className="rating-votes">
                     ({movieDetails.imdbVotes} votes)
                   </span>
+                )}
+              </div>
+            )}
+
+            {movieDetails.aiAnalysis && (
+              <div className="ai-review-section">
+                <div className="ai-review-header">
+                  <i className="pi pi-sparkles"></i>
+                  <h3>AI Generated Review</h3>
+                </div>
+
+                <div className={`sentiment-badge sentiment-${movieDetails.aiAnalysis.overallSentiment}`}>
+                  <i className={`pi ${
+                    movieDetails.aiAnalysis.overallSentiment === 'positive' ? 'pi-thumbs-up' :
+                    movieDetails.aiAnalysis.overallSentiment === 'negative' ? 'pi-thumbs-down' :
+                    'pi-minus'
+                  }`}></i>
+                  <span>{movieDetails.aiAnalysis.overallSentiment.toUpperCase()}</span>
+                  <span className="sentiment-score">{movieDetails.aiAnalysis.sentimentScore}%</span>
+                </div>
+
+                <div className="ai-summary">
+                  <p>{movieDetails.aiAnalysis.summary}</p>
+                </div>
+
+                <div className="reception-grid">
+                  <div className="reception-item">
+                    <strong><i className="pi pi-users"></i> Audience</strong>
+                    <p>{movieDetails.aiAnalysis.audienceReception}</p>
+                  </div>
+                  <div className="reception-item">
+                    <strong><i className="pi pi-pencil"></i> Critics</strong>
+                    <p>{movieDetails.aiAnalysis.criticsReception}</p>
+                  </div>
+                </div>
+
+                {movieDetails.aiAnalysis.keyInsights.length > 0 && (
+                  <div className="key-insights">
+                    <strong>Key Insights:</strong>
+                    <ul>
+                      {movieDetails.aiAnalysis.keyInsights.map((insight, index) => (
+                        <li key={index}>{insight}</li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </div>
             )}

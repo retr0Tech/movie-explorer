@@ -45,3 +45,16 @@ export interface MovieResponse  {
 	type: MovieType,
 	poster: string
 }
+
+export interface MovieRatingAnalysis {
+  overallSentiment: 'positive' | 'mixed' | 'negative';
+  sentimentScore: number;
+  audienceReception: string;
+  criticsReception: string;
+  keyInsights: string[];
+  summary: string;
+}
+
+export interface OmdbMovieDetailWithAnalysisDto extends OmdbMovieDetailDto {
+  aiAnalysis: MovieRatingAnalysis;
+}

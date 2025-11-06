@@ -1,7 +1,7 @@
 import { FavoriteMovie } from "../models/favorites/favorite-movie";
 import { FavoriteMovieResponse } from "../models/favorites/favorite-movie-response";
 import { UpdateFavorite } from "../models/favorites/update-favorite-movie";
-import { OmdbSearchResponseDto, OmdbMovieDetailDto } from "../models/movies/movie-response";
+import { OmdbSearchResponseDto, OmdbMovieDetailDto, OmdbMovieDetailWithAnalysisDto } from "../models/movies/movie-response";
 import { RecommendationResponse } from "../models/recommendations/recommendation-response";
 import * as baseService from "./base-service";
 
@@ -16,6 +16,13 @@ export const getMovieById = () => {
     const _get = baseService.get<OmdbMovieDetailDto>();
     return async (movieId: string, token: string) => {
         return await _get(`movies/${movieId}`, {'Authorization': `Bearer ${token}`});
+    }
+};
+
+export const getMovieByIdWithAnalysis = () => {
+    const _get = baseService.get<OmdbMovieDetailWithAnalysisDto>();
+    return async (movieId: string, token: string) => {
+        return await _get(`movies/${movieId}/analysis`, {'Authorization': `Bearer ${token}`});
     }
 };
 
