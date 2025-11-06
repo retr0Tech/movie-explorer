@@ -1,11 +1,13 @@
 import { Button } from 'primereact/button'
 import { InputText } from 'primereact/inputtext'
 import { Panel } from 'primereact/panel'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { getFavoriteMoviesAsync, getMoviesAsync, selectMovies, selectTotalMovies, setMovies, setTotalMovies } from '../../store/movie/movie-slice';
 import MoviesGrid from '../movies/MoviesGrid';
 import { useAuth0 } from '@auth0/auth0-react';
+
+const INITIAL_SEARCH_QUERIES = ['Avengers', 'Star Wars', 'Harry Potter', 'Spider', 'Batman'];
 
 export default function MoviesExplorer() {
 	const dispatch = useAppDispatch();
@@ -16,6 +18,39 @@ export default function MoviesExplorer() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [page, setPage] = useState(0);
 	const [isActive, setIsActive] = useState(false);
+	const [hasLoadedInitial, setHasLoadedInitial] = useState(false);
+
+	// Check if movies already exist in Redux (from previous session/tab switch)
+	useEffect(() => {
+		if (movies.length > 0 && !isActive) {
+			setIsActive(true);
+		}
+	}, [movies.length, isActive]);
+
+	// Load initial movies on component mount
+	useEffect(() => {
+		const loadInitialMovies = async () => {
+			// Only load if there are no movies already loaded and we haven't loaded initial movies
+			if (movies.length === 0 && !hasLoadedInitial && !isActive) {
+				setIsLoading(true);
+				setIsActive(true);
+				try {
+					const token = await getAccessTokenSilently();
+					await dispatch(getFavoriteMoviesAsync(token));
+					// Pick a random popular movie query
+					const randomQuery = INITIAL_SEARCH_QUERIES[Math.floor(Math.random() * INITIAL_SEARCH_QUERIES.length)];
+					await dispatch(getMoviesAsync(randomQuery, 1, token));
+					setHasLoadedInitial(true);
+				} catch (error) {
+					console.error('Failed to load initial movies:', error);
+				} finally {
+					setIsLoading(false);
+				}
+			}
+		};
+
+		loadInitialMovies();
+	}, [dispatch, getAccessTokenSilently, movies.length, hasLoadedInitial, isActive]);
 
 	const handleSearch = async (page: number) => {
 		setIsActive(true);
@@ -33,11 +68,12 @@ export default function MoviesExplorer() {
     await handleSearch(page+1);
 	}
 
-	const handleReset = () => {		
+	const handleReset = () => {
 		setTitle('');
 		dispatch(setMovies([]));
 		dispatch(setTotalMovies(0));
 		setIsActive(false);
+		setHasLoadedInitial(false);
 	};
 
 	return (

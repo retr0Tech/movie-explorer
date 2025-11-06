@@ -60,4 +60,24 @@ export class MoviesController {
   async getMovieDetails(@Param('imdbId') imdbId: string) {
     return this.moviesService.getMovieDetails(imdbId);
   }
+
+  @ApiOperation({
+    summary: 'Get movie details with AI analysis',
+    description:
+      'Get detailed movie information with AI-powered sentiment analysis of ratings and reviews',
+  })
+  @ApiParam({
+    name: 'imdbId',
+    description: 'IMDB movie ID',
+    example: 'tt0111161',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Movie details with AI analysis retrieved successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Movie not found' })
+  @Get(':imdbId/analysis')
+  async getMovieDetailsWithAnalysis(@Param('imdbId') imdbId: string) {
+    return this.moviesService.getMovieDetailsWithAnalysis(imdbId);
+  }
 }
