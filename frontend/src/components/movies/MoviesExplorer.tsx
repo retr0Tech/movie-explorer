@@ -7,7 +7,7 @@ import { getFavoriteMoviesAsync, getMoviesAsync, selectMovies, selectTotalMovies
 import MoviesGrid from '../movies/MoviesGrid';
 import { useAuth0 } from '@auth0/auth0-react';
 
-const INITIAL_SEARCH_QUERIES = ['Avengers', 'Star Wars', 'Harry Potter', 'Spider', 'Batman'];
+const INITIAL_SEARCH_QUERIES = ['Avengers', 'Star Wars', 'Harry Potter', 'Spider', 'Universal'];
 
 export default function MoviesExplorer() {
 	const dispatch = useAppDispatch();
