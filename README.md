@@ -43,7 +43,7 @@ cd movie-explorer
 
 # 3. Run the start script
 ./start.sh
-//if using windows run this command in git bash
+# if using windows run this command in git bash
 ```
 
 **That's it!** Access the app at http://localhost
