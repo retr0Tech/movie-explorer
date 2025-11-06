@@ -36,9 +36,9 @@ export default function MoviesExplorer() {
 				setIsActive(true);
 				try {
 					const token = await getAccessTokenSilently();
-					await dispatch(getFavoriteMoviesAsync(token));
 					// Pick a random popular movie query
 					const randomQuery = INITIAL_SEARCH_QUERIES[Math.floor(Math.random() * INITIAL_SEARCH_QUERIES.length)];
+					await dispatch(getFavoriteMoviesAsync(token, randomQuery));
 					await dispatch(getMoviesAsync(randomQuery, 1, token));
 					setHasLoadedInitial(true);
 				} catch (error) {

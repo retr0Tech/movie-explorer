@@ -1,7 +1,7 @@
 import { FavoriteMovie } from "../models/favorites/favorite-movie";
 import { FavoriteMovieResponse } from "../models/favorites/favorite-movie-response";
 import { UpdateFavorite } from "../models/favorites/update-favorite-movie";
-import { OmdbSearchResponseDto, OmdbMovieDetailDto, OmdbMovieDetailWithAnalysisDto } from "../models/movies/movie-response";
+import { OmdbSearchResponseDto, OmdbMovieDetailDto } from "../models/movies/movie-response";
 import { RecommendationResponse } from "../models/recommendations/recommendation-response";
 import * as baseService from "./base-service";
 
@@ -19,18 +19,10 @@ export const getMovieById = () => {
     }
 };
 
-export const getMovieByIdWithAnalysis = () => {
-    const _get = baseService.get<OmdbMovieDetailWithAnalysisDto>();
+export const getMovieAnalysis = () => {
+    const _get = baseService.get<import("../models/movies/movie-response").MovieRatingAnalysis>();
     return async (movieId: string, token: string) => {
         return await _get(`movies/${movieId}/analysis`, {'Authorization': `Bearer ${token}`});
-    }
-};
-
-// Backend API calls (for favorites management)
-export const getFavoriteMovies = () => {
-    const _get = baseService.get<FavoriteMovieResponse[]>();
-    return async (token: string) => {
-        return await _get('favorites', {'Authorization': `Bearer ${token}`});
     }
 };
 
@@ -44,7 +36,7 @@ export const getFavoriteMoviesPaginated = () => {
         hasNextPage: boolean;
         hasPreviousPage: boolean;
     }>();
-    return async (token: string, page: number = 1, limit: number = 10, filter: string) => {
+    return async (token: string, page: number = 1, limit: number = 8, filter: string) => {
         return await _get(`favorites?page=${page}&limit=${limit}&filter=${filter}`, {'Authorization': `Bearer ${token}`});
     }
 };

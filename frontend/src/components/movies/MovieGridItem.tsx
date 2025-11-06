@@ -3,12 +3,12 @@ import { Button } from "primereact/button";
 import { Movie } from "../../models/movies/movie";
 import noPosterImg from "../../no-poster.png";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MovieModal from "./MovieModal";
 
 interface MovieGridItemProps {
   movie: Movie;
-  onToggleFavorite?: (movie: Movie) => void;
+  onToggleFavorite?: (movie: Movie) => Promise<boolean>;
   index?: number;
 }
 
@@ -21,14 +21,21 @@ export default function MovieGridItem({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [heartAnimate, setHeartAnimate] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleToggleFavorite = () => {
     if (onToggleFavorite) {
       setHeartAnimate(true);
       setTimeout(() => setHeartAnimate(false), 500);
-      onToggleFavorite(movie);
+      onToggleFavorite(movie).then((result) => {
+        setIsFavorite(result);
+      });
     }
   };
+
+  useEffect(() => {
+    setIsFavorite(movie.isFavorite);
+  }, [movie]);
 
   return (
     <motion.div
@@ -86,11 +93,11 @@ export default function MovieGridItem({
             style={{ width: "100%" }}
           />
           <Button
-            icon={movie.isFavorite ? "pi pi-heart-fill" : "pi pi-heart"}
+            icon={isFavorite ? "pi pi-heart-fill" : "pi pi-heart"}
             label={
-              movie.isFavorite ? "Remove from Favorites" : "Add to Favorites"
+              isFavorite ? "Remove from Favorites" : "Add to Favorites"
             }
-            severity={ movie.isFavorite ? "danger" : "info"}
+            severity={ isFavorite ? "danger" : "info"}
             className={`p-button-rounded ${heartAnimate ? "heart-animate" : ""}`}
             onClick={handleToggleFavorite}
             style={{ width: "100%" }}
@@ -102,7 +109,7 @@ export default function MovieGridItem({
         visible={showModal}
         onHide={() => setShowModal(false)}
         imdbId={movie.imdbID}
-        isFavorite={movie.isFavorite}
+        isFavorite={isFavorite}
         onToggleFavorite={() => {
           handleToggleFavorite();
           setShowModal(false);

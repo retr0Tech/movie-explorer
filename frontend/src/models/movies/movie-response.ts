@@ -5,6 +5,7 @@ export interface OmdbMovieDto {
   imdbID: string;
   Type: string;
   Poster: string;
+  isFavorite: boolean;
 }
 export interface OmdbSearchResponseDto {
   Search: OmdbMovieDto[];
@@ -37,13 +38,15 @@ export interface OmdbMovieDetailDto {
   Production: string;
   Website: string;
   Response: string;
+  isFavorite: boolean;
 }
 export interface MovieResponse  {
 	title: string,
 	year: number,
 	imdbID: string,
 	type: MovieType,
-	poster: string
+	poster: string,
+	isFavorite: boolean
 }
 
 export interface MovieRatingAnalysis {

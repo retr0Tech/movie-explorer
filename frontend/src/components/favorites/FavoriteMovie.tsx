@@ -27,7 +27,7 @@ export default function FavoriteMovie() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [displayedMovies, setDisplayedMovies] = useState<FavoriteMovieModel[]>([]);
 	const getFavoriteMovieByImdbId = movieService.getFavoriteMovieByImdbId();
-	const ITEMS_PER_PAGE = 10;
+	const ITEMS_PER_PAGE = 8;
 
 	const fetchFavorites = useCallback(async (page: number) => {
 		try {

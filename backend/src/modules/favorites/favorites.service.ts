@@ -5,7 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Like, Repository, In } from 'typeorm';
 import { Favorite } from './entities/favorite.orm-entity';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { UpdateFavoriteDto } from './dto/update-favorite.dto';
@@ -152,6 +152,34 @@ export class FavoritesService {
     }
 
     await this.favoriteRepository.remove(favorite);
+  }
+
+  async checkIfFavorites(
+    userId: string,
+    imdbIds: string[],
+  ): Promise<Set<string>> {
+    if (!imdbIds || imdbIds.length === 0) {
+      return new Set();
+    }
+
+    const favorites = await this.favoriteRepository.find({
+      where: {
+        userId,
+        imdbId: In(imdbIds),
+      },
+      select: ['imdbId'],
+    });
+
+    return new Set(favorites.map((fav) => fav.imdbId));
+  }
+
+  async isFavorite(userId: string, imdbId: string): Promise<boolean> {
+    const favorite = await this.favoriteRepository.findOne({
+      where: { userId, imdbId },
+      select: ['id'],
+    });
+
+    return !!favorite;
   }
 
   private mapToResponseDto(favorite: Favorite): FavoriteResponseDto {

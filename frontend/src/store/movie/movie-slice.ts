@@ -33,7 +33,7 @@ export const getMoviesAsync = (
                 imdbID: movie.imdbID,
                 type: movie.Type as MovieType,
                 poster: movie.Poster,
-                isFavorite: false
+                isFavorite: movie.isFavorite
             } as MovieResponse));
             const totalRecords = Number(moviesResponse.data.totalResults)
             dispatch(setTotalMovies(totalRecords))
@@ -55,7 +55,7 @@ export const getFavoriteMoviesAsync = (
         }
 
         const getFavoritesService = movieService.getFavoriteMoviesPaginated();
-        const favoritesResponse = await getFavoritesService(authToken, 1, 10, filter ?? '');
+        const favoritesResponse = await getFavoritesService(authToken, 1, 8, filter ?? '');
         if (favoritesResponse.success && favoritesResponse.data) {
             dispatch(setFavoriteMovies(favoritesResponse.data.data));
         }
@@ -74,7 +74,7 @@ export const moviesSlice = createSlice({
                     imdbID: movieResponse.imdbID as string,
                     type: movieResponse.type,
                     poster: movieResponse.poster as string,
-                    isFavorite: state.favoriteMovies.map(x => x.imdbId).includes(movieResponse.imdbID)
+                    isFavorite: movieResponse.isFavorite
                 };
             });
             state.movies = movies;
@@ -84,6 +84,12 @@ export const moviesSlice = createSlice({
         },
         setFavoriteMovies: (state, action: PayloadAction<FavoriteMovie[]>) => {
             state.favoriteMovies = action.payload;
+        },
+        updateMovieFavoriteStatus: (state, action: PayloadAction<{ imdbID: string; isFavorite: boolean }>) => {
+            const movie = state.movies.find(m => m.imdbID === action.payload.imdbID);
+            if (movie) {
+                movie.isFavorite = action.payload.isFavorite;
+            }
         }
     }
 });
@@ -92,6 +98,7 @@ export const {
     setMovies,
     setFavoriteMovies,
     setTotalMovies,
+    updateMovieFavoriteStatus,
 } = moviesSlice.actions;
 
 export const selectMovies = (state: RootState) => state.movies.movies;

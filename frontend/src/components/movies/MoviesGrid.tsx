@@ -7,9 +7,9 @@ import { useContext } from 'react';
 import { ToastContext } from '../../App';
 import MoviesGridSkeleton from './MoviesGridSkeleton';
 import { FavoriteMovie as FavoriteMovieModel } from '../../models/favorites/favorite-movie';
-import { useAppDispatch } from '../../store/hooks';
-import { getFavoriteMoviesAsync, setMovies } from '../../store/movie/movie-slice';
 import { motion } from 'framer-motion';
+import { useAppDispatch } from '../../store/hooks';
+import { updateMovieFavoriteStatus } from '../../store/movie/movie-slice';
 
 export default function MoviesGrid({movies, totalRecords, currentPage, isLoading, onPageChange}: {movies: Movie[], totalRecords: number, currentPage: number, isLoading: boolean, onPageChange: Function}) {
 	const { getAccessTokenSilently} = useAuth0();
@@ -19,10 +19,8 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 	const deleteFavoriteMovie = movieService.deleteFavorite();
 	const getFavoriteMovieByImdbId = movieService.getFavoriteMovieByImdbId();
 
-	const handleToggleFavorite = async (movie: Movie) => {
-		// Update Redux store optimistically
+	const handleToggleFavorite = async (movie: Movie): Promise<boolean> => {
 		const token = await getAccessTokenSilently();
-		// Sync with backend
 		try {
 			if (!movie.isFavorite) {
 				// Add to favorites - first fetch full movie details
@@ -42,6 +40,9 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 						runtime: details.Runtime || ''
 					} as FavoriteMovieModel);
 
+					// Update Redux store
+					dispatch(updateMovieFavoriteStatus({ imdbID: movie.imdbID, isFavorite: true }));
+
 					toast?.current?.show({
 						severity: 'success',
 						summary: 'Added to Favorites',
@@ -52,6 +53,10 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 				// Remove from favorites
 				const favMovie = await getFavoriteMovieByImdbId(movie.imdbID, token);
 				await deleteFavoriteMovie(favMovie.data.id, token);
+
+				// Update Redux store
+				dispatch(updateMovieFavoriteStatus({ imdbID: movie.imdbID, isFavorite: false }));
+
 				toast?.current?.show({
 					severity: 'info',
 					summary: 'Removed from Favorites',
@@ -59,6 +64,7 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 					life: 3000
 				});
 			}
+			return true;
 		} catch (error) {
 			console.error('Failed to sync favorite with backend:', error);
 			toast?.current?.show({
@@ -67,10 +73,7 @@ export default function MoviesGrid({movies, totalRecords, currentPage, isLoading
 				detail: 'Failed to update favorites. Please try again.',
 				life: 4000
 			});
-		}
-		finally{
-			await dispatch(getFavoriteMoviesAsync(token, movie.title));
-			await dispatch(setMovies(movies));
+			return false;
 		}
 	};
 

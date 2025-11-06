@@ -9,6 +9,9 @@ import {
 } from '@nestjs/swagger';
 import { MoviesService } from './movies.service';
 import { Auth0Guard } from '../auth/auth0.guard';
+import { User } from '../auth/decorators/user.decorator';
+import { MovieSearchResponseDto } from './dto/movie-search-response.dto';
+import { MovieDetailResponseDto } from './dto/movie-detail-response.dto';
 
 @ApiTags('movies')
 @ApiBearerAuth('JWT-auth')
@@ -19,7 +22,8 @@ export class MoviesController {
 
   @ApiOperation({
     summary: 'Search for movies',
-    description: 'Search movies by title using OMDB API',
+    description:
+      'Search movies by title using OMDB API. Includes favorite status for each movie.',
   })
   @ApiQuery({
     name: 'title',
@@ -32,19 +36,25 @@ export class MoviesController {
     required: false,
     example: 1,
   })
-  @ApiResponse({ status: 200, description: 'Movies found successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Movies found successfully',
+    type: MovieSearchResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Invalid search parameters' })
   @Get('search')
   async searchMovies(
+    @User('userId') userId: string,
     @Query('title') title: string,
     @Query('page') page?: number,
   ) {
-    return this.moviesService.searchMovies(title, page || 1);
+    return this.moviesService.searchMovies(title, userId, page || 1);
   }
 
   @ApiOperation({
     summary: 'Get movie details',
-    description: 'Get detailed information about a specific movie by IMDB ID',
+    description:
+      'Get detailed information about a specific movie by IMDB ID. Includes favorite status.',
   })
   @ApiParam({
     name: 'imdbId',
@@ -54,17 +64,21 @@ export class MoviesController {
   @ApiResponse({
     status: 200,
     description: 'Movie details retrieved successfully',
+    type: MovieDetailResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Movie not found' })
   @Get(':imdbId')
-  async getMovieDetails(@Param('imdbId') imdbId: string) {
-    return this.moviesService.getMovieDetails(imdbId);
+  async getMovieDetails(
+    @User('userId') userId: string,
+    @Param('imdbId') imdbId: string,
+  ) {
+    return this.moviesService.getMovieDetails(imdbId, userId);
   }
 
   @ApiOperation({
-    summary: 'Get movie details with AI analysis',
+    summary: 'Get AI analysis for a movie',
     description:
-      'Get detailed movie information with AI-powered sentiment analysis of ratings and reviews',
+      'Get AI-powered sentiment analysis of movie ratings and reviews. Returns only the AI analysis without full movie details.',
   })
   @ApiParam({
     name: 'imdbId',
@@ -73,11 +87,11 @@ export class MoviesController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Movie details with AI analysis retrieved successfully',
+    description: 'AI analysis retrieved successfully',
   })
   @ApiResponse({ status: 404, description: 'Movie not found' })
   @Get(':imdbId/analysis')
-  async getMovieDetailsWithAnalysis(@Param('imdbId') imdbId: string) {
-    return this.moviesService.getMovieDetailsWithAnalysis(imdbId);
+  async getMovieAnalysis(@Param('imdbId') imdbId: string) {
+    return this.moviesService.getMovieAnalysis(imdbId);
   }
 }

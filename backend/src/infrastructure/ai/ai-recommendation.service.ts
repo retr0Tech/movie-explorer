@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { HfInference } from '@huggingface/inference';
 import { ConfigService } from '@nestjs/config';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export interface MovieRecommendation {
   title: string;
@@ -19,16 +19,14 @@ export interface MovieRatingAnalysis {
 
 @Injectable()
 export class AIRecommendationService {
-  private hf: HfInference;
+  private ai;
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('HF_API_KEY');
-    if (!apiKey) {
-      console.warn(
-        'HF_API_KEY not configured. AI recommendations will not work.',
-      );
-    }
-    this.hf = new HfInference(apiKey || 'placeholder');
+    const gApiKey = this.configService.get<string>('GOOGLE_API_KEY');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+    const genAI = new GoogleGenerativeAI(gApiKey as string);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    this.ai = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
   }
 
   async getMovieRecommendations(
@@ -45,22 +43,14 @@ export class AIRecommendationService {
         moviePlot,
       );
 
-      const response = await this.hf.chatCompletion({
-        model: 'meta-llama/Llama-3.2-3B-Instruct',
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        max_tokens: 1024,
-        temperature: 0.7,
-      });
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      const response = await this.ai.generateContent(prompt);
 
       // Parse the response
-      const content = response.choices[0]?.message?.content;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      const content = response.response.text();
       if (content) {
-        return this.parseRecommendations(content);
+        return this.parseRecommendations(content as string);
       }
 
       return [];
@@ -150,22 +140,15 @@ Only return the JSON array, no additional text.`;
         genre,
         year,
       );
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      const response = await this.ai.generateContent(prompt);
 
-      const response = await this.hf.chatCompletion({
-        model: 'meta-llama/Llama-3.2-3B-Instruct',
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        max_tokens: 1024,
-        temperature: 0.7,
-      });
+      // Parse the response
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      const content = response.response.text();
 
-      const content = response.choices[0]?.message?.content;
       if (content) {
-        return this.parseRatingAnalysis(content);
+        return this.parseRatingAnalysis(content as string);
       }
 
       return this.getDefaultAnalysis();
@@ -226,9 +209,7 @@ Only return the JSON object, no additional text.`;
       // Try to extract JSON from the response
       try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const parsed = JSON.parse(
-          text[text.length - 1] === '}' ? text : `${text}}`,
-        );
+        const parsed = JSON.parse(text.replace(/```json|```/g, '').trim());
         // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return parsed;
       } catch {
